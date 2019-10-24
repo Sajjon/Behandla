@@ -28,6 +28,6 @@ let package = Package(
 
         .testTarget(
             name: "BehandlaTests",
-            dependencies: ["Behandla"]),
+            dependencies: ["Behandla", "Core"]),
     ]
 )

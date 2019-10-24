@@ -33,7 +33,20 @@ public final class Line: Codable, CustomStringConvertible, Hashable, Comparable 
 
     public private (set) var numberOfOccurencesInCorpus: Int
 
-    init?(unparsedReadLine: UnparsedReadLine) throws {
+    // For testing purposes only
+    internal init(word wordString: String, partOfSpeechTag: PartOfSpeech? = nil, occurences: Int = 1, line: Int = #line) {
+        do {
+            self.word = try Word(linePart: wordString)
+            self.partOfSpeechTags = [partOfSpeechTag].compactMap({ $0 })
+            self.canonicalFormsOfWord = CanonicalFormsOfWord(removingDuplicates: [])
+            self.numberOfOccurencesInCorpus = occurences
+            self.lines = [line]
+        } catch {
+            fatalError("Word error: \(error), from string: '\(wordString)")
+        }
+    }
+
+    public init?(unparsedReadLine: UnparsedReadLine) throws {
 
         let parts = unparsedReadLine.unparsedLine.parts(separatedBy: Self.interLineDelimiter)
 

@@ -68,7 +68,7 @@ public enum PartOfSpeech: String, CaseIterable, Equatable, CustomStringConvertib
     case interjection = "IN"
 
     /// 🇸🇪: `Adjektiv`, e.g. "glad"
-    case Adjective = "JJ"
+    case adjective = "JJ"
 
     /// 🇸🇪: `Konjunktion`, e.g. "och" (🇬🇧: "and")
     case conjunction = "KN"

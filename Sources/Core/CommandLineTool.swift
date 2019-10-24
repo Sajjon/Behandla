@@ -3,7 +3,18 @@ import Foundation
 
 public extension Set where Element == PartOfSpeech {
     static var blacklisted: Set<PartOfSpeech> {
-        return Set([PartOfSpeech.foreignWord])
+        return Set([
+            .foreignWord
+        ])
+    }
+
+    static var whitelisted: Set<PartOfSpeech> {
+        return Set([
+            .noun,
+            .adjective,
+            .verb,
+            .adverb
+        ])
     }
 }
 
@@ -34,17 +45,18 @@ public extension CommandLineTool {
         let taggedWords = try loadElseParseTaggedWords(fileName: "tagged_words.json")
         print("✅ taggedWords contains #\(taggedWords.linesOfTaggedWords.count) lines")
 
-        let homonymsSortedDescendingPosTagCount = taggedWords.homonyms().sorted(by:
+        let sortedOnPosTagCountThenFrequency = taggedWords.linesOfTaggedWords.contents.sorted(by:
         { $0.posCount == $1.posCount ? $0.frequency > $1.frequency : $0.posCount > $1.posCount  }
         )
 
-        print("⭐️ Found #\(homonymsSortedDescendingPosTagCount.count) homonyms")
+        print("⭐️ Found #\(taggedWords.homonyms().count) homonyms")
 
         checkAgainstWhitelist(taggedWords)
 
-        let bip39Words = try bip39WordList(from: OrderedSet(array: homonymsSortedDescendingPosTagCount), amount: 2600)
+        let bip39Words = try bip39WordList(from: OrderedSet(array: sortedOnPosTagCountThenFrequency), amount: 2600)
 
-        try save(strings: bip39Words, outputFileName: "swedish.txt")
+        try save(strings: bip39Words, outputFileName: "swedish_sorted_by_pos_tag_count_then_word_frequency.txt")
+        try save(strings: bip39Words.sorted(), outputFileName: "swedish_sorted_alphabetically.txt")
     }
 }
 
@@ -109,11 +121,35 @@ private extension CommandLineTool {
         return wordList
     }
 
-    func parseCorpus(numberOfLinesToParse: Int, fileName: String, partOfSpeechBlackList: Set<PartOfSpeech> = .blacklisted) throws -> TaggedWords {
+    enum PartOfSpeechStrategy {
+
+        case includeOnlyWhitelisted(
+            Set<PartOfSpeech> = .whitelisted
+        )
+
+        case excludeOnlyBlacklisted(
+            Set<PartOfSpeech> = .blacklisted
+        )
+
+        func allows(_ pos: PartOfSpeech) -> Bool {
+            switch self {
+                case .includeOnlyWhitelisted(let whitelisted):
+                    return whitelisted.contains(pos)
+                case .excludeOnlyBlacklisted(let blacklisted):
+                    return !blacklisted.contains(pos)
+            }
+        }
+    }
+
+    func parseCorpus(
+        numberOfLinesToParse: Int,
+        fileName: String,
+        partOfSpeechStrategy: PartOfSpeechStrategy = .includeOnlyWhitelisted()
+    ) throws -> TaggedWords {
         let file = try openFile(named: fileName)
         let lineReader = try LineReader(file: file)
         print("✅ Starting to parse lines")
-        var uniqueOrderedListOfLines = OrderedSet<Line>()
+        let lines = Lines()
         for lineIndex in 0...numberOfLinesToParse {
             if lineIndex % announceMilestoneEveryNthLineRead == 0 {
                 print("📢 parsed #\(lineIndex) lines")
@@ -123,7 +159,7 @@ private extension CommandLineTool {
                     print("⚠️ Warning Did not read #\(numberOfLinesToParse) lines as requested, read #\(lineIndex) lines.")
                 }
                 print("Line nil, stopping...")
-                return TaggedWords(lines: uniqueOrderedListOfLines, result: .notAllLinesParsed)
+                return TaggedWords(lines: lines, result: .notAllLinesParsed)
             }
             let unparsedLine = UnparsedReadLine(unparsedLine: rawLine, positionInCorpus: lineIndex)
 
@@ -131,19 +167,17 @@ private extension CommandLineTool {
                 continue
             }
 
-            guard let posTag = line.partOfSpeechTags.first, !partOfSpeechBlackList.contains(posTag) else {
-                print("🏴‍☠️ Skipped line: '\(line)', due to POS tag being blacklisted")
+            let posTag = line.partOfSpeechTags.first!
+
+            guard partOfSpeechStrategy.allows(posTag) else {
+//                print("🏴‍☠️ Skipped line: '\(line)', due to POS tag being blacklisted")
                 continue
             }
 
-            if uniqueOrderedListOfLines.contains(line) {
-                uniqueOrderedListOfLines[line]!.update(with: line)
-            } else {
-                uniqueOrderedListOfLines.append(line)
-            }
+            lines.insert(line: line)
         }
 
-        return TaggedWords(lines: uniqueOrderedListOfLines, result: .allSpecifiedLinesWasParsed)
+        return TaggedWords(lines: lines, result: .allSpecifiedLinesWasParsed)
     }
 
     func parse(line: UnparsedReadLine) throws -> Line? {

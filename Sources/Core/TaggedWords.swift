@@ -13,9 +13,11 @@ import Foundation
 ///
 /// [1]: https://svn.spraakdata.gu.se/sb-arkiv/pub/frekvens/stats_PAROLE.txt
 public struct TaggedWords: Codable {
+
     public let linesOfTaggedWords: OrderedSet<Line>
-    public init(lines: OrderedSet<Line>, result: Result) {
-        self.linesOfTaggedWords = lines
+
+    public init(lines: Lines, result: Result) {
+        self.linesOfTaggedWords = lines.lines
         print(result)
     }
 }

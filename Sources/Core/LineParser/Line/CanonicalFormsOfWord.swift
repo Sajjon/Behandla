@@ -17,7 +17,7 @@ public struct CanonicalFormsOfWord: CustomStringConvertible, Codable {
 
     public let baseForms: [String]
 
-    private init(removingDuplicates baseForms: [String]) {
+    internal init(removingDuplicates baseForms: [String]) {
         self.baseForms = baseForms.removingDuplicates()
     }
 
