@@ -1,5 +1,5 @@
 # What is this?
-This is #PureSwift code for construction of a [BIP39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) compatible list of common Swedish words. For analysis I've used some Python too.
+This is #PureSwift code for construction of a [BIP39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) compatible list of common Swedish 🇸🇪 words. For analysis I've used some Python too.
 
 # Corpus
 I've used the statistics document ([stats_PAROLE.txt](https://svn.spraakdata.gu.se/sb-arkiv/pub/frekvens/stats_PAROLE.txt)) of the [Parole Corpus](https://spraakbanken.gu.se/eng/resource/parole) containing around 19 million tokens.
@@ -33,3 +33,51 @@ To recap, the lines contain this information (separated by tabs)
 
 `WORD | POS | BASE_FORM | NUMBER_OF_OCCURENCES`
 
+### Read lines
+In this step we read `L` number of lines of the source corpus. The result of this program is a BIP39 compatible wordlist which contains 2048 (`2¹¹`) words. 
+
+The goal of this step is to convert the source corpus into Swift `Line` models which we can write to a JSON file to allow faster execution of the program next time. For the next run of the program we can thus skip to step 2.
+
+We are going to reject *a lot* of lines in the source corpus, because it contains delimitors. It also contains words being to short (less than 3 characters, e.g. common Swedish words 🇸🇪: _"en"_ (🇬🇧:_"one"_), and prepositions 🇸🇪: _"i"_ (🇬🇧: _"in"_).
+
+The model of the line is thus:
+```swift
+struct ReadLine {
+    let word: String
+    let partOfSpeechTag: PartOfSpeechTag
+    let baseForm: String
+    let numberOfOccurences: Int
+    let positionInCorpus: Int
+}
+```
+We read the corpus until we have created a list of `L` lines. This step should not so much logic, but it is uncessary to save lines which we know we will reject, e.g. because the word is too short, or because it is a delimitor.
+
+But if we are going to reject the line because the "word" is too short, what do we mean by "word", the read word (part one of the line) Or the base word of the line (part three of the line)?
+
+On line #119 in the corpus (which is really early, since around ~100 of these 119 lines are probably going to be rejected (because too short, or prepositions etc)) we find this line:
+
+`sa    VB.PRT.AKT    |säga..vb.1|    -    16499    678.884698`
+
+If we were to *just* look at the _word_ (first part) - 🇸🇪: _"sa"_ (🇬🇧: _"said"_), we would reject this line since it is less than threshold character count of 3, however, if we look at the base word, 🇸🇪: _"säga"_ (🇬🇧: _"to say"_), it is four characters long. Thus including this line we might get interesting data for the decision in relation to the base word. 
+
+# Decisions
+
+(this section is a work in progress)
+
+## Hononyms 👍
+A hononym is a word with multiple meanings given the same spelling. E.g. 🇸🇪: _"banan"_ with that exact same spelling, it means multiple things: 🇬🇧: _"the banana"_ and 🇬🇧: _"the lane"_, 🇬🇧: _"the trajectory"_  etc. 
+
+Since the idea of BIP39 is that the words should be easy to remember and words with multiple meanings might be easier to get associations with and thus easier to remember, given that they are common enough.
+
+My assumption/theory/idea is that a word at frequency index `i` with only one meaning, might not be as suitable as hononym at index `i + 𝚫` (later in the frequency list, i.e. not as common word). The question is where to draw the line. The relation between 𝚫 and #meanings.
+
+## Homophones 👎
+Homophones are words with different spelling, but same pronouncation. E.g 🇸🇪: _"egg"_ and 🇸🇪: _"ägg"_  (🇬🇧: _"edge"_ (🔪) and _"egg"_(🥚) respectively). My theory is that this makes it harder to remember (since spelling matters). 
+
+Even though it seems likely that we do not want any homophones in the list, it is not so easy to identify them automatically. Below follow some algorthms.
+
+### Algorithms
+https://github.com/ticki/eudex
+
+### Papers about Swedish phonetic algorithms
+https://www.nada.kth.se/utbildning/grukth/exjobb/rapportlistor/2011/rapporter11/spaedtke_johan_11076.pdf
