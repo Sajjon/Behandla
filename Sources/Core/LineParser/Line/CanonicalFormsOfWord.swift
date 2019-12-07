@@ -7,12 +7,6 @@
 
 import Foundation
 
-extension Array where Element: Hashable {
-    func removingDuplicates() -> Self {
-        return [Element](Set<Element>(self))
-    }
-}
-
 public struct CanonicalFormsOfWord: CustomStringConvertible, Codable {
 
     public let baseForms: [String]
@@ -23,17 +17,22 @@ public struct CanonicalFormsOfWord: CustomStringConvertible, Codable {
 
     /// Zero to many base forms of a word, delimited by `|`
     ///
-    /// See the example of six lines below
+    /// See the example of lines below
     ///
-    ///     Men    KN    |men..kn.1|    -    63570    2615.716121
-    ///     :    MID    |    -    63104    2596.541609
-    ///     vi    PN.UTR.PLU.DEF.SUB    |vi..pn.1|    -    63037    2593.784759
-    ///     det    DT.NEU.SIN.DEF    |en..al.1|den..pn.1|    -    62891    2587.777294
-    ///     hon    PN.UTR.SIN.DEF.SUB    |hon..pn.1|    -    59411    2444.585661
-    ///     minst    AB.SUV    |minst..ab.1|liten..av.1|lite..ab.1|föga..ab.1|    -    5728    235.690136
+    ///     ===============================================================================================================
+    ///     Col0        Col1                        Col2                        Col3        Col4            Col5
+    ///     ===============================================================================================================
+    ///     Word form   Part Of Speech              Base form(s)                Compound?   Occurences      Relative frequency
+    ///     ===============================================================================================================
+    ///     veckor      NN.UTR.PLU.IND.NOM          |vecka..nn.1|               -           2932870         220.342774
+    ///     om          SN                          |om..sn.1|även_om..snm.1|   -           2930416         220.158409
+    ///     va          IN                          |va..in.1|                  -           2910224         218.641409
+    ///     fler        JJ.POS.UTR+NEU.PLU.IND.NOM  |                           -           2909834         218.612109
+    ///     kvinnor     NN.UTR.PLU.IND.NOM          |kvinna..nn.1|              +           2903606         218.144207
     ///
-    /// We can see tha the last line, with base forms of the word `"minst"` contains four base forms,
-    /// whereas the first only contained one, and the second zero
+    /// We can see tha the second line, with base forms of the word `"om"` contains two base forms,
+    /// whereas the first only contained one, and the fourth zero.
+    ///
     public init(linePart string: String) throws {
         let parts = string.parts(separatedBy: Self.delimiter)
 

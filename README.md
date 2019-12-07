@@ -1,21 +1,31 @@
 # What is this?
 This is #PureSwift code for construction of a [BIP39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) compatible list of common Swedish 🇸🇪 words. For analysis I've used some Python too.
 
-# Corpus
-I've used the statistics document ([stats_PAROLE.txt](https://svn.spraakdata.gu.se/sb-arkiv/pub/frekvens/stats_PAROLE.txt)) of the [Parole Corpus](https://spraakbanken.gu.se/eng/resource/parole) containing around 19 million tokens.
+# Meta Corpus
+I have not used a "raw" corpus, but rather a parsed version which contains metadata regarding frequency, which saves a lot of time. So even though this is not a "raw" corpus, but rather a semi processed one, I will refer to it as the "corpus".
+
+I've used Språkbankens ["Korpusstatistik"](https://spraakbanken.gu.se/swe/forskning/infrastruktur/korp/korpusstatistik). Here we can find many documents, but I've used the aggregated file (_"Samtliga i en fil"_), which is a 4.9 gb document you can download for yourself [here](https://svn.spraakdata.gu.se/sb-arkiv/pub/frekvens/stats_all.txt). The file was as of today (2019-12-07) last updated 2019-05-16. It contains 957,472,046 sentences and 13,310,488,661 _tokens_.
+
+Information about the format of the statistical document can be found [here](https://spraakbanken.gu.se/eng/info)
+
 
 ## Format
-Each line start with a word, and statistics and meta data about it, on a tab-separated format:
+Each line in the corpus contains six columns on a tab-separated format:
+
 ```
 är  VB.PRS.AKT  |vara..vb.1|    -   316581  13026.365036
 ```
 
-Explanation:
-* `är` is the **word** (English transation of the word: _is_ / _am_ / _are_)  
-* `VB.PRS.AKT` is the **part of speech (POS) tag**, meaning _verb presens aktiv_ (English transation of the POS tag: _Verb present tense active_). 
-* `|vara..vb.1|` gives information about the base form of the word, here _vara_ means _to be_. 
-* `316581` is the number of occurences in the corpus. 
-* `13026.365036` I don't know what the last float number is, if you know, please tell me :).  
+The columns contain this information:
+1. Word form (🇸🇪: _ordform_)
+2. Part of speech (🇸🇪:_ordklass_), legend [here](https://spraakbanken.gu.se/korp/markup/msdtags.html))
+3. Base form (🇸🇪: _lemgram -vilka refererar till en viss grundform och böjningstabell)
+4. `+` or `-` which indicates whether a compound analysis was possible or not. E.g. (🇸🇪: _"stämband"_, is a compound word consisting of _"stäm"_ and _"band"_)
+5. Raw frequencey (total number of occurences)
+6. Relative frequency (number of occurences per 1 million words)
+
+(More about _"lemgram"_, [from explaination here](https://spraakbanken.gu.se/swe/forskning/infrastruktur/korp/anvandarhandledning) -  _ett lemgram är ett ords eller ett flerordsuttrycks samtliga böjningsformer, och gör det möjligt att i en och samma sökning söka efter både "katt", "katter", "katterna" och så vidare._)
+
 
 # Methodology
 
@@ -28,10 +38,6 @@ The result is 62% Noun (`NN`), 23% Adjective (`JJ`), 9% Verb (`VB`), 3% Adverb (
 
 ## Algorithm
 The algorithm used is heavily dependent on the source data, i.e. the format of each line in the corpus.
-
-To recap, the lines contain this information (separated by tabs)
-
-`WORD | POS | BASE_FORM | NUMBER_OF_OCCURENCES`
 
 ### Read lines
 
@@ -46,10 +52,12 @@ The model of the line is thus:
 struct ReadLine {
 
     // Read verbatim from corpus
-    let word: String
+    let wordForm: String
     let partOfSpeechTag: PartOfSpeechTag
     let baseForm: String
-    let numberOfOccurences: Int
+    let compoundWord: Bool
+    let totalNumberOfOccurences: Int
+    let relativeNumberOfOccurences: Double
     
     // Appended by this program
     let positionInCorpus: Int
@@ -60,14 +68,13 @@ We read the corpus until we have created a list of `L` lines. This step should n
 
 But if we are going to reject the line because the "word" is too short, what do we mean by "word", the read word (part one of the line) Or the base word of the line (part three of the line)?
 
-On line #119 in the corpus (which is really early, since around ~100 of these 119 lines are probably going to be rejected (because too short, or prepositions etc)) we find this line:
+On line #252 in the corpus (which is really early) we find this line:
 
-`sa    VB.PRT.AKT    |säga..vb.1|    -    16499    678.884698`
+`sa VB.PRT.AKT  |säga..vb.1|    -   4857774 364.958352`
 
 If we were to *just* look at the _word_ (first part) - 🇸🇪: _"sa"_ (🇬🇧: _"said"_), we would reject this line since it is less than threshold character count of 3, however, if we look at the base word, 🇸🇪: _"säga"_ (🇬🇧: _"to say"_), it is four characters long. Thus including this line we might get interesting data for the decision in relation to the base word. 
 
 Apart from data parsed from corpus we add two properties, `positionInCorpus` and `indexInListOfIncludedParsedLines`.
-
 
 
 # Decisions
@@ -84,6 +91,7 @@ My assumption/theory/idea is that a word at frequency index `i` with only one me
 ### Homograph
 A homograph is a word with the same spelling but different pronouncation, e.g. 🇸🇪: _"banan"_, which can mean 🇬🇧: _"the lane" or 🇬🇧: _"the banana"_. Since homographs are a subset of homonyms they are welcome. In fact a homonym being a homograph might be even better for creating different associations than a non-homographical homonym.
 
+Here is a good online tool to check meanings of Swedish words: https://spraakbanken.gu.se/ws/saldo-ws/fl/html/banan
 
 ## Homophones 👎
 Homophones are words with different spelling, but same pronouncation. E.g 🇸🇪: _"egg"_ and 🇸🇪: _"ägg"_  (🇬🇧: _"edge"_ (🔪) and _"egg"_(🥚) respectively). My theory is that this makes it harder to remember (since spelling matters). 

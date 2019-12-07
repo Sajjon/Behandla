@@ -7,45 +7,50 @@
 
 import Foundation
 
-/// Below follows an example of 6 lines from the corpus
+/// Some lines from the corpus:
 ///
-///     till    PP    |till..pp.1|    -    183125    7535.048209
-///     "    PAD    |    -    174001    7159.622790
-///     den    DT.UTR.SIN.DEF    |en..al.1|den..pn.1|    -    141582    5825.677519
-///     ett    DT.NEU.SIN.IND    |en..al.1|    -    133832    5506.788106
-///     -    MID    |    -    131135    5395.814591
-///     han    PN.UTR.SIN.DEF.SUB    |han..pn.1|    -    125071    5146.299056
-///
+///     Word form   Part Of Speech              Base form(s)                Compound?   Occurences      Relative frequency
+///     ------------------------------------------------------------------------------------------------------------------
+///     veckor      NN.UTR.PLU.IND.NOM          |vecka..nn.1|               -           2932870         220.342774
+///     om          SN                          |om..sn.1|även_om..snm.1|   -           2930416         220.158409
+///     va          IN                          |va..in.1|                  -           2910224         218.641409
+///     fler        JJ.POS.UTR+NEU.PLU.IND.NOM  |                           -           2909834         218.612109
+///     kvinnor     NN.UTR.PLU.IND.NOM          |kvinna..nn.1|              +           2903606         218.144207
 ///
 public final class Line: Codable, CustomStringConvertible, Hashable, Comparable {
 
-    /// Absolut position in corpus at its earliest position
-    public private (set) var lines: [Int]
+    // MARK: - Properties
+
+    // MARK: Corpus properties
 
     /// The word, on lowercased form
-    public let word: Word
+    public let wordForm: WordForm
 
-    /// Part of speech tag, only first major tag, .e.g from line `han    PN.UTR.SIN.DEF.SUB`, we only save `PN`/
-    public private (set) var partOfSpeechTags: [PartOfSpeech]
+    /// Part of speech tag, only first major tag, .e.g from line `han    PN.UTR.SIN.DEF.SUB`, we only save `PN`
+    public let partOfSpeechTag: PartOfSpeech
 
-    /// Base form of word
-    public private (set) var canonicalFormsOfWord: CanonicalFormsOfWord
+    /// Base form(s) of word
+    public let canonicalFormsOfWord: CanonicalFormsOfWord
 
-    public private (set) var numberOfOccurencesInCorpus: Int
+    /// Whether this is a compound word or not, an example of a compound word is 🇸🇪_"stämband"_,
+    /// consisting of the word _"stäm"_ and the word _"band"_.
+    public let isCompoundWord: Bool
 
-    // For testing purposes only
-    internal init(word wordString: String, partOfSpeechTag: PartOfSpeech? = nil, occurences: Int = 1, line: Int = #line) {
-        do {
-            self.word = try Word(linePart: wordString)
-            self.partOfSpeechTags = [partOfSpeechTag].compactMap({ $0 })
-            self.canonicalFormsOfWord = CanonicalFormsOfWord(removingDuplicates: [])
-            self.numberOfOccurencesInCorpus = occurences
-            self.lines = [line]
-        } catch {
-            fatalError("Word error: \(error), from string: '\(wordString)")
-        }
-    }
+    /// The total frequency, the number of occurences of the word form in the corpus.
+    public let numberOfOccurencesInCorpus: Int
 
+    /// The relative frequency of the word form in the corpus per 1 million words.
+    public let relativeFrequencyPerOneMillion: Double
+
+    // MARK: Meta properties
+
+    /// The index of this parsed line in the corpus
+    public let indexOfLineInCorpus: Int
+
+    /// The index of this line instance in the collection of non-rejected lines.
+    public let index: Int
+
+    /// "Designated" initializer
     public init?(unparsedReadLine: UnparsedReadLine) throws {
 
         let parts = unparsedReadLine.unparsedLine.parts(separatedBy: Self.interLineDelimiter)
@@ -54,40 +59,30 @@ public final class Line: Codable, CustomStringConvertible, Hashable, Comparable 
             throw Error.unexpectedNumberOfComponents(got: parts.count)
         }
 
-        self.lines = [unparsedReadLine.positionInCorpus]
 
         do {
-            self.word = try Word(linePart: parts[0])
-        } catch { // let wordError as Word.Error {
-//            print("Skipped word: '\(parts[0])' (due to: \(wordError)")
+            self.word = try WordForm(linePart: parts[0])
+        } catch let wordError as Word.Error {
+            print("Skipped word: '\(parts[0])' (due to: \(wordError)")
             return nil
         }
 
-        self.partOfSpeechTags = [try PartOfSpeech(linePart: parts[1])]
+        self.partOfSpeechTag = try PartOfSpeech(linePart: parts[1])
         self.canonicalFormsOfWord = try CanonicalFormsOfWord(linePart: parts[2])
 
         /// We expect the fourth part to just be a dash separating parts from numbers specifying occurences
-        guard parts[3].count == 1 else {
-            fatalError("Unexpected length delimiter: '\(parts[3])'")
-        }
+        self.isCompoundWord = try IsCompoundWord(linePart: parts[3]).isCompoundWord
 
         guard let numberOfOccurencesInCorpus = Int(parts[4]) else {
             throw Error.stringNotAnInteger(parts[4])
         }
 
         self.numberOfOccurencesInCorpus = numberOfOccurencesInCorpus
-    }
-}
 
-public extension Line {
-    func update(with other: Line) {
-        guard other == self else {
-            fatalError("not same word, abort.")
+        guard let relativeFrequencyPerOneMillion = Double(parts[5]) else {
+            throw Error.stringNotADouble(parts[5])
         }
-        self.lines.append(contentsOf: other.lines)
-        self.numberOfOccurencesInCorpus += other.numberOfOccurencesInCorpus
-        self.partOfSpeechTags = (partOfSpeechTags + other.partOfSpeechTags).removingDuplicates()
-        self.canonicalFormsOfWord = canonicalFormsOfWord.merged(with: other.canonicalFormsOfWord)
+        self.relativeFrequencyPerOneMillion = relativeFrequencyPerOneMillion
     }
 }
 
@@ -112,6 +107,7 @@ public extension Line {
         )
 
         case stringNotAnInteger(String)
+        case stringNotADouble(String)
     }
 }
 
@@ -144,14 +140,6 @@ public extension Line {
         \(word), pos: \(partOfSpeechTags), base: [\(canonicalFormsOfWord)]
         """
     }
-}
-
-
-internal func castErrorOrKill<Error>(_ anyError: Swift.Error) -> Error where Error: Swift.Error {
-    guard let error = anyError as? Error else {
-        fatalError("Wrong error type, got error: \(anyError), but expected error of type: \(type(of: Error.self))")
-    }
-    return error
 }
 
 // MARK: Codable

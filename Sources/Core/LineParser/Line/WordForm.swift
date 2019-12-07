@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct Word: CustomStringConvertible, Hashable, Comparable, Codable {
+public struct WordForm: CustomStringConvertible, Hashable, Comparable, Codable {
 
     public let lowercasedWord: String
 
@@ -33,19 +33,19 @@ public struct Word: CustomStringConvertible, Hashable, Comparable, Codable {
 }
 
 // MARK: CustomStringConvertible
-public extension Word {
+public extension WordForm {
     var description: String { lowercasedWord }
 }
 
 // MARK: Comparable
-public extension Word {
-    static func < (lhs: Word, rhs: Word) -> Bool {
+public extension WordForm {
+    static func < (lhs: WordForm, rhs: WordForm) -> Bool {
         lhs.lowercasedWord < rhs.lowercasedWord
     }
 }
 
 // MARK: Constants
-public extension Word {
+public extension WordForm {
     static let allowedCharacter = "abcdefghijklmnopqrstuvwxyzåäö"
     static let allowedCharacterSet = CharacterSet(charactersIn: Self.allowedCharacter)
     static let minimumLength = 3
@@ -53,28 +53,28 @@ public extension Word {
 }
 
 // MARK: Error
-public extension Word {
+public extension WordForm {
     enum Error: Swift.Error {
 
         case tooLong(
             gotLength: Int,
-            butExpectedAtMost: Int = Word.maximumLength
+            butExpectedAtMost: Int = WordForm.maximumLength
         )
 
         case tooShort(
             gotLength: Int,
-            butExpectedAtLeast: Int = Word.minimumLength
+            butExpectedAtLeast: Int = WordForm.minimumLength
         )
 
         case disallowedCharacter(
             invalid: String,
-            expectedOnlyAnyOf: String = Word.allowedCharacter
+            expectedOnlyAnyOf: String = WordForm.allowedCharacter
         )
     }
 }
 
 // MARK: Hashabble
-public extension Word {
+public extension WordForm {
     func hash(into hasher: inout Hasher) {
         // We only care about the first characters, since we need to be able to disambituate fast.
         let prefix = String(lowercasedWord.prefix(BIP39.numberOfCharactersToUnambigiouslyIdentifyWord))
@@ -83,7 +83,7 @@ public extension Word {
     }
 }
 
-public extension Word {
+public extension WordForm {
 
     func encode(to encoder: Encoder) throws {
         var singleValueContainer = encoder.singleValueContainer()

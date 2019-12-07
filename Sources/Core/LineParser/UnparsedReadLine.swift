@@ -10,5 +10,9 @@ import Foundation
 public struct UnparsedReadLine: CustomStringConvertible {
     public let unparsedLine: String
     public let positionInCorpus: Int
-    public var description: String { unparsedLine }
+}
+
+// MARK: CustomStringConvertible
+public extension UnparsedReadLine {
+    var description: String { unparsedLine }
 }
