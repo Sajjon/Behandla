@@ -8,13 +8,17 @@
 import Foundation
 
 protocol NamedTask {
-    var name: String { get }
+    var nameOfJob: String { get }
 }
 
 extension NamedTask {
-    var name: String {
+    var nameOfJob: String {
         .init(describing: Mirror(reflecting: self).subjectType)
     }
+}
+
+protocol LinesCountable {
+    var numberOfLines: Int { get }
 }
 
 protocol Job: NamedTask {

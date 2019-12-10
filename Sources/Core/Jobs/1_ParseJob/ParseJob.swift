@@ -26,6 +26,6 @@ extension ParseJob {
             parsedLines.append(parsedLine)
         }
 
-        return ParsedLines(parsedLines: parsedLines, amount: .allSpecifiedLinesWasParsed)
+        return ParsedLines(parsedLines: parsedLines)
     }
 }

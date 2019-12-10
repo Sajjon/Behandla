@@ -43,22 +43,14 @@ public extension BIP39.Creator {
 
         print("🚀 Started jobs, scan context: \(scanCorpusContext), shouldCache: \(shouldCache)")
 
-        let pipeline: Pipeline<ScanCorpusContext, String> = Pipeline {
+        let pipeline = Pipeline {
             ScanJob(shouldCache: shouldCache)
             ParseJob(shouldCache: shouldCache)
             NominateJob(shouldCache: shouldCache)
-            AnnounceFinishedJob()
         }
 
         let result = try pipeline.work(input: scanCorpusContext)
         print("🔮 Done with pipeline:\n🕐 \(pipeline) 🕤\nResult of pipeline 🎉:\n\n\(result)\n")
-    }
-}
-
-struct AnnounceFinishedJob: Job {
-    typealias Input = NominatedLines
-    func work(input: Input) throws -> String {
-        "finished parsing #\(input.lines.count) lines, namely: \(input.lines)"
     }
 }
 

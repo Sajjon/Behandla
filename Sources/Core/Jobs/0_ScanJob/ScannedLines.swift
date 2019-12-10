@@ -8,18 +8,15 @@
 import Foundation
 
 /// This is a parsed in memory version of the corpus.
-public struct ScannedLines: Hashable, Codable {
+public struct ScannedLines: Hashable, Codable, LinesCountable {
 
     public let scannedLines: OrderedSet<ScannedLine>
 
-    public init(scannedLines: OrderedSet<ScannedLine>, amount: Amount) {
+    public init(scannedLines: OrderedSet<ScannedLine>) {
         self.scannedLines = scannedLines
     }
 }
 
 public extension ScannedLines {
-    enum Amount: Int, Codable {
-        case allSpecifiedLinesWasParsed
-        case notAllLinesParsed
-    }
+    var numberOfLines: Int { scannedLines.count }
 }

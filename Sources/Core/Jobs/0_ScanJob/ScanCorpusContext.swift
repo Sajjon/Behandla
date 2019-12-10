@@ -7,10 +7,14 @@
 
 import Foundation
 
-struct ScanCorpusContext {
+struct ScanCorpusContext: LinesCountable, Codable {
     /// Name of corpus file to scan
     public let fileNameOfInputCorpus: String
 
     /// How many lines to scan
     public let numberOfLinesToScan: Int
+}
+
+extension ScanCorpusContext {
+    var numberOfLines: Int { numberOfLinesToScan }
 }

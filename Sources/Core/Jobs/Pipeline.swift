@@ -35,12 +35,12 @@ extension Pipeline {
 @_functionBuilder
 struct BuildPipeline {
 
-    static func buildBlock<A>(_ jobA: A) -> Pipeline<A.Input, A.Output>
+    static func buildBlock<A>(_ a: A) -> Pipeline<A.Input, A.Output>
         where
         A: Job
     {
-        Pipeline(description: jobA.name) { input in
-            try jobA.work(input: input)
+        Pipeline(description: descriptionOf(jobs: [a])) { input in
+            try a.work(input: input)
         }
     }
 
@@ -132,5 +132,5 @@ private func |> <J>(input: J.Input, job: J) throws -> J.Output where J: Job {
 }
 
 private func descriptionOf(jobs: [NamedTask]) -> String {
-    jobs.map { $0.name }.joined(separator: " |> ")
+    jobs.map { $0.nameOfJob }.joined(separator: " |> ")
 }

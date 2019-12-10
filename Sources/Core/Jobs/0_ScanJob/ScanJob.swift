@@ -29,7 +29,7 @@ extension ScanJob: CacheableJob {
         let numberOfLinesToScan = scanCorpusContext.numberOfLinesToScan
         var scannedLines = OrderedSet<ScannedLine>()
 
-        for lineIndex in 0...numberOfLinesToScan {
+        readlines: for lineIndex in 0...numberOfLinesToScan {
 
             if lineIndex % announceEveryNthScannedLine == 0 {
                 print("📢 scanned #\(lineIndex) lines")
@@ -37,10 +37,10 @@ extension ScanJob: CacheableJob {
 
             guard let rawLine: String = lineReader.nextLine() else {
                 if lineIndex < numberOfLinesToScan {
-                    print("⚠️ Warning Did not scan #\(numberOfLinesToScan) lines as requested, scanned #\(lineIndex) lines.")
+                    throw Error.notEnoughLinesScanned
                 }
-                print("Line nil, stopping...")
-                return ScannedLines(scannedLines: scannedLines, amount: .notAllLinesParsed)
+//                return ScannedLines(scannedLines: scannedLines)
+                break readlines
             }
 
             let scannedLine = ScannedLine(lineFromCorpus: rawLine, positionInCorpus: lineIndex)
@@ -48,6 +48,12 @@ extension ScanJob: CacheableJob {
             scannedLines.append(scannedLine)
         }
 
-        return ScannedLines(scannedLines: scannedLines, amount: .allSpecifiedLinesWasParsed)
+        return ScannedLines(scannedLines: scannedLines)
+    }
+}
+
+extension ScanJob {
+    enum Error: Swift.Error, Equatable {
+        case notEnoughLinesScanned
     }
 }

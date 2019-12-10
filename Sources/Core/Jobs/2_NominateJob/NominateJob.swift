@@ -31,7 +31,7 @@ extension NominateJob {
             let nominatedLine = NominatedLine(parsedLine: parsedLine)
             nominatedLines.append(nominatedLine)
         }
-        return NominatedLines(nominatedLines: nominatedLines)
+        return NominatedLines(lines: nominatedLines)
     }
 }
 
