@@ -7,11 +7,11 @@
 
 import Foundation
 
-public protocol WordFromString {
+protocol WordFromString {
     static func from(unvalidatedString: String, language: Language) throws -> String
 }
 
-public extension WordFromString {
+extension WordFromString {
 
     static func from(unvalidatedString: String, language: Language = SupportedLanguage.swedish) throws -> String {
         let lowercased = unvalidatedString.lowercased()

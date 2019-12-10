@@ -7,13 +7,15 @@
 
 import Foundation
 
+// MARK: BIP39
 public enum BIP39 {}
 
-public extension BIP39 {
+extension BIP39 {
     static let minimumWordLength = 3
     static let numberOfCharactersToUnambigiouslyIdentifyWord = 4
 }
 
+// MARK: Creator
 public extension BIP39 {
     final class Creator {
 
@@ -35,6 +37,7 @@ public extension BIP39 {
     }
 }
 
+// MARK: Pipeline
 public extension BIP39.Creator {
     func createWordList() throws {
 
@@ -44,10 +47,11 @@ public extension BIP39.Creator {
             ScanJob(runContext: runContext)
             ParseJob(runContext: runContext)
             NominateJob(runContext: runContext)
+            ElectJob(runContext: runContext)
         }
 
         let result = try pipeline.work(input: runContext)
-        let lines = result.lines.contents.prefix(runContext.numberOfLinesToScan)
+        let lines = result.prefix(runContext.numberOfLinesToScan)
         print("🔮 Done with pipeline:\n🕐 \(pipeline) 🕤\nResult of pipeline #\(lines.count) lines.")
     }
 }
@@ -118,7 +122,8 @@ public extension BIP39.Creator {
     }
 }
 
-public extension BIP39.Creator {
+// MARK: Error
+extension BIP39.Creator {
     enum Error: Swift.Error {
         case expectedEvenNumberOfArguments
         case expectedNamedArgumentToStartWithDoubleDash

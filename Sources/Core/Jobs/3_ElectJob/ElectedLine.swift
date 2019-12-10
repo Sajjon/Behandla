@@ -7,8 +7,8 @@
 
 import Foundation
 
-/// A line nominated for the short list of resulting BIP39 words (from lines).
-struct NominatedLine: LineFromCorpus, Hashable {
+/// A line that has advanced from the nominated short list of lines, awaiting confirmation of becomming part of the 2048 BIP39 words.
+struct ElectedLine: LineFromCorpus, Hashable {
     let wordForm: WordForm
     let partOfSpeechTag: PartOfSpeech
     let lemgrams: Lemgrams

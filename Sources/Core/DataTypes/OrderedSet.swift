@@ -30,7 +30,7 @@ import Foundation
 ///
 /// [1]: https://github.com/apple/swift-package-manager/blob/master/Sources/Basic/OrderedSet.swift
 ///
-public struct OrderedSet<Element>:
+struct OrderedSet<Element>:
     RandomAccessCollection,
     Equatable,
     ExpressibleByArrayLiteral,
@@ -43,14 +43,14 @@ where
     private var set: Set<Element>
     
     /// Creates an empty ordered set.
-    public init() {
+    init() {
         self.array = []
         self.set = Set()
     }
 }
 
 // MARK: Convenience Init
-public extension OrderedSet {
+extension OrderedSet {
     
     /// Creates an ordered set with the contents of `array`.
     ///
@@ -73,13 +73,13 @@ public extension OrderedSet {
 }
 
 // MARK: Typealias
-public extension OrderedSet {
+extension OrderedSet {
     typealias Index = Int
     typealias Indices = Range<Int>
 }
 
 // MARK: OrderedSetType
-public extension OrderedSet {
+extension OrderedSet {
     
     
     func contains(_ member: Element) -> Bool {
@@ -96,7 +96,7 @@ public extension OrderedSet {
 }
 
 // MARK: Computed Properties
-public extension OrderedSet {
+extension OrderedSet {
     // MARK: Working with an ordered set
     /// The number of elements the ordered set stores.
     var count: Int { return array.count }
@@ -110,7 +110,7 @@ public extension OrderedSet {
 
 
 // MARK: Mutating functions
-public extension OrderedSet {
+extension OrderedSet {
     
     /// Adds an element to the ordered set.
     ///
@@ -148,7 +148,7 @@ public extension OrderedSet {
 }
 
 // MARK: ExpressibleByArrayLiteral
-public extension OrderedSet {
+extension OrderedSet {
     /// Create an instance initialized with `elements`.
     ///
     /// If an element occurs more than once in `element`, only the first one
@@ -160,7 +160,7 @@ public extension OrderedSet {
 
 
 // MARK: CustomStringConvertible
-public extension OrderedSet {
+extension OrderedSet {
     
     var description: String {
         return array.description
@@ -168,7 +168,7 @@ public extension OrderedSet {
 }
 
 // MARK: RandomAccessCollection
-public extension OrderedSet {
+extension OrderedSet {
     var startIndex: Int { return contents.startIndex }
     var endIndex: Int { return contents.endIndex }
     subscript(index: Int) -> Element {
@@ -184,7 +184,7 @@ public extension OrderedSet {
 }
 
 // MARK: Equals
-public func == <T>(lhs: OrderedSet<T>, rhs: OrderedSet<T>) -> Bool {
+func == <T>(lhs: OrderedSet<T>, rhs: OrderedSet<T>) -> Bool {
     return lhs.contents == rhs.contents
 }
 
@@ -193,12 +193,12 @@ extension OrderedSet: Hashable where Element: Hashable { }
 
 extension OrderedSet: Codable where Element: Codable {
 
-    public func encode(to encoder: Encoder) throws {
+    func encode(to encoder: Encoder) throws {
         var singleValueContainer = encoder.singleValueContainer()
         try singleValueContainer.encode(contents)
     }
 
-    public init(from decoder: Decoder) throws {
+    init(from decoder: Decoder) throws {
         let singleValueContainer = try decoder.singleValueContainer()
         self.init(array: try singleValueContainer.decode([Element].self))
     }

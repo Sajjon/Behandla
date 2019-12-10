@@ -7,18 +7,18 @@
 
 import Foundation
 
-public protocol Language {
+protocol Language {
     var allowedCharacter: String { get }
 }
 
-public extension Language {
+extension Language {
     var allowedCharacterSet: CharacterSet { .init(charactersIn: allowedCharacter) }
 }
 
-public struct SupportedLanguage: Language {
-    public let allowedCharacter: String
+struct SupportedLanguage: Language {
+    let allowedCharacter: String
 }
 
-public extension SupportedLanguage {
+extension SupportedLanguage {
     static let swedish = Self(allowedCharacter: "abcdefghijklmnopqrstuvwxyzåäö")
 }

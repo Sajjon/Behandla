@@ -2,17 +2,17 @@
 import Foundation
 import Core
 
-public final class CommandLineTool {
+final class CommandLineTool {
 
     private let arguments: [String]
 
-    public init(arguments: [String] = CommandLine.arguments) {
+    init(arguments: [String] = CommandLine.arguments) {
         self.arguments = arguments
     }
 }
 
 // MARK: - Run
-public extension CommandLineTool {
+extension CommandLineTool {
 
     func run() throws {
         let creator = try BIP39.Creator(arguments: arguments)

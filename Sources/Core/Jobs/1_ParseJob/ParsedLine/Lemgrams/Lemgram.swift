@@ -7,13 +7,13 @@
 
 import Foundation
 
-public struct Lemgram: CustomStringConvertible, Hashable, Codable {
-    public let baseForm: BaseForm
-    public let partOfSpeech: PartOfSpeech
-    public let index: Int
+struct Lemgram: CustomStringConvertible, Hashable, Codable {
+    private let b: BaseForm
+    private let p: PartOfSpeech
+    private let i: Int
 
     /// Expects a `{word}..{pos}.{index}` format, i.e. any `|` should already have been removed.
-    public init(linePart string: String) throws {
+    init(linePart string: String) throws {
         let components = string.components(separatedBy: "..")
 
         guard components.count == 2 else {
@@ -32,25 +32,36 @@ public struct Lemgram: CustomStringConvertible, Hashable, Codable {
         }
 
 
-        self.baseForm = try BaseForm(linePart: word)
+        self.b = try BaseForm(linePart: word)
 
-        self.partOfSpeech = try PartOfSpeech(linePart: posAndIndexComponents[0].uppercased())
+        self.p = try PartOfSpeech(linePart: posAndIndexComponents[0].uppercased())
 
-        self.index = index
+        self.i = index
     }
 }
 
-public extension Lemgram {
-    struct BaseForm: WordFromString, Codable, Hashable {
-        public let word: String
+extension Lemgram {
 
-        public init(linePart anyCase: String) throws {
-            self.word = try Self.from(unvalidatedString: anyCase)
+    var baseForm: BaseForm { b }
+    var partOfSpeech: PartOfSpeech { p }
+    var index: Int { i }
+}
+
+extension Lemgram {
+    struct BaseForm: WordFromString, Codable, Hashable {
+        private let w: String
+
+        init(linePart anyCase: String) throws {
+            self.w = try Self.from(unvalidatedString: anyCase)
         }
     }
 }
 
-public extension Lemgram {
+extension Lemgram.BaseForm {
+    var word: String { w }
+}
+
+extension Lemgram {
     var description: String {
         """
         \(index): \(baseForm.word) (\(partOfSpeech))

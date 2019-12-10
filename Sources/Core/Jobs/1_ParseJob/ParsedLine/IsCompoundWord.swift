@@ -7,10 +7,10 @@
 
 import Foundation
 
-public struct IsCompoundWord {
-    public let isCompoundWord: Bool
+struct IsCompoundWord {
+    let isCompoundWord: Bool
 
-    public init(linePart string: String) throws {
+    init(linePart string: String) throws {
         guard string == "+" || string == "-" else {
             throw Error.expectedMinusOrPlus(butGot: string)
         }
@@ -19,7 +19,7 @@ public struct IsCompoundWord {
 }
 
 // MARK: Error
-public extension IsCompoundWord {
+extension IsCompoundWord {
     enum Error: Swift.Error {
         case expectedMinusOrPlus(butGot: String)
     }

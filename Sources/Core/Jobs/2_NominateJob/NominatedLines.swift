@@ -7,7 +7,5 @@
 
 import Foundation
 
-/// This is a parsed in memory version of the corpus.
-public struct NominatedLines: Hashable, Codable {
-    public let lines: OrderedSet<NominatedLine>
-}
+/// Lines which have been nominated
+typealias NominatedLines = Lines<NominatedLine>

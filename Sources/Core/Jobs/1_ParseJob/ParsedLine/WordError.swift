@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum WordError: Swift.Error {
+enum WordError: Swift.Error {
     case disallowedCharacter(
         invalid: String,
         expectedOnlyAnyOf: String

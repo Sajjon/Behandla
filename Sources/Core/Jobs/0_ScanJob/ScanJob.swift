@@ -8,9 +8,7 @@
 import Foundation
 
 struct ScanJob {
-
-    public let runContext: RunContext
-    public let announceEveryNthScannedLine = 100
+    let runContext: RunContext
 }
 
 // MARK: Job
@@ -38,24 +36,18 @@ extension ScanJob: CacheableJob {
 
         readlines: for lineIndex in 0...numberOfLinesToScan {
 
-            if lineIndex % announceEveryNthScannedLine == 0 {
-                print("📢 scanned #\(lineIndex) lines")
-            }
-
             guard let rawLine: String = lineReader.nextLine() else {
                 if lineIndex < numberOfLinesToScan {
                     throw Error.notEnoughLinesScanned
                 }
-//                return ScannedLines(scannedLines: scannedLines)
                 break readlines
             }
 
             let scannedLine = ScannedLine(lineFromCorpus: rawLine, positionInCorpus: lineIndex)
-
             scannedLines.append(scannedLine)
         }
 
-        return ScannedLines(scannedLines: scannedLines)
+        return ScannedLines(scannedLines)
     }
 }
 

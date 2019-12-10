@@ -7,9 +7,9 @@
 
 import Foundation
 
-public struct WordForm: WordFromString, CustomStringConvertible, Hashable, Comparable, Codable {
+struct WordForm: WordFromString, CustomStringConvertible, Hashable, Comparable, Codable {
 
-    public let lowercasedWord: String
+    let lowercasedWord: String
 
     init(linePart anyCase: String) throws {
         self.lowercasedWord = try Self.from(unvalidatedString: anyCase)
@@ -17,19 +17,19 @@ public struct WordForm: WordFromString, CustomStringConvertible, Hashable, Compa
 }
 
 // MARK: CustomStringConvertible
-public extension WordForm {
+extension WordForm {
     var description: String { lowercasedWord }
 }
 
 // MARK: Comparable
-public extension WordForm {
+extension WordForm {
     static func < (lhs: WordForm, rhs: WordForm) -> Bool {
         lhs.lowercasedWord < rhs.lowercasedWord
     }
 }
 
 // MARK: Hashabble
-public extension WordForm {
+extension WordForm {
     func hash(into hasher: inout Hasher) {
         // We only care about the first characters, since we need to be able to disambituate fast.
         let prefix = String(lowercasedWord.prefix(BIP39.numberOfCharactersToUnambigiouslyIdentifyWord))
@@ -38,7 +38,7 @@ public extension WordForm {
     }
 }
 
-public extension WordForm {
+extension WordForm {
 
     func encode(to encoder: Encoder) throws {
         var singleValueContainer = encoder.singleValueContainer()

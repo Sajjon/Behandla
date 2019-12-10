@@ -16,7 +16,7 @@ extension NominateJob {
     typealias Input = ParsedLines
     typealias Output = NominatedLines
 
-    func newWork(input: Input) throws -> Output {
+    func newWork(input parsedLines: Input) throws -> Output {
         var nominatedLines = OrderedSet<NominatedLine>()
 
         let matcher: IncludeIf = [
@@ -24,14 +24,14 @@ extension NominateJob {
             .partOfSpeechIsWhitelisted,
         ]
 
-        for parsedLine in input.parsedLines {
+        for parsedLine in parsedLines {
             guard matcher.checkIfLineShouldBeIncluded(line: parsedLine) else {
                 continue
             }
-            let nominatedLine = NominatedLine(parsedLine: parsedLine)
+            let nominatedLine = NominatedLine(line: parsedLine)
             nominatedLines.append(nominatedLine)
         }
-        return NominatedLines(lines: nominatedLines)
+        return NominatedLines(nominatedLines)
     }
 }
 

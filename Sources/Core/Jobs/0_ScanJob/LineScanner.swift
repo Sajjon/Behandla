@@ -17,7 +17,7 @@ internal final class LineScanner  {
     var buffer: Data
     var atEof: Bool
 
-    public init(
+    init(
         file: FileHandle,
         encoding: String.Encoding = .utf8,
         chunkSize: Int = 4096
@@ -33,7 +33,7 @@ internal final class LineScanner  {
     }
 
     /// Return next line, or nil on EOF.
-    public func nextLine() -> String? {
+    func nextLine() -> String? {
         // Read data chunks from file until a line delimiter is found:
         while !atEof {
             //get a data from the buffer up to the next delimiter
@@ -62,7 +62,7 @@ internal final class LineScanner  {
     }
 
     /// Start reading from the beginning of file.
-    public func rewind() -> Void {
+    func rewind() -> Void {
         fileHandle.seek(toFileOffset: 0)
         buffer.count = 0
         atEof = false
@@ -71,7 +71,7 @@ internal final class LineScanner  {
 }
 
 extension LineScanner: Sequence {
-    public func makeIterator() -> AnyIterator<String> {
+    func makeIterator() -> AnyIterator<String> {
         return AnyIterator {
             return self.nextLine()
         }

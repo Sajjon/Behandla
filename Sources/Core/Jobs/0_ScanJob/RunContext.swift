@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class RunContext {
+final class RunContext: CustomStringConvertible {
 
     /// Name of corpus file to scan
     let fileNameOfInputCorpus: String
@@ -29,5 +29,11 @@ final class RunContext {
         self.numberOfLinesToScan = numberOfLinesToScan
         self.shouldLoadCachedInput = shouldLoadCachedInput
         self.shouldCachedOutput = shouldCachedOutput
+    }
+}
+
+extension RunContext {
+    var description: String {
+        "input: \(fileNameOfInputCorpus), #lines: \(numberOfLinesToScan), loadFromCache: \(shouldLoadCachedInput), saveToCache: \(shouldCachedOutput)"
     }
 }
