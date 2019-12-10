@@ -19,12 +19,12 @@ let package = Package(
             name: "Behandla",
             dependencies: ["Core"],
             path: "Sources/Behandla"
-            ),
+        ),
 
         .target(
             name: "Core",
             path: "Sources/Core"
-            ),
+        ),
 
         .testTarget(
             name: "BehandlaTests",

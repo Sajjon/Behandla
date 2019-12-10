@@ -31,20 +31,3 @@ final class RunContext {
         self.shouldCachedOutput = shouldCachedOutput
     }
 }
-
-extension RunContext {
-    convenience init(
-        fileNameOfInputCorpus: String,
-        numberOfLinesToScan: Int,
-        shouldCache: Bool
-    ) {
-        self.init(
-            fileNameOfInputCorpus: fileNameOfInputCorpus,
-            numberOfLinesToScan: numberOfLinesToScan,
-
-            shouldLoadCachedInput: shouldCache,
-            shouldCachedOutput: shouldCache
-        )
-
-    }
-}

@@ -22,15 +22,15 @@ public extension BIP39 {
         init(
             fileNameOfInputCorpus: String,
             numberOfLinesToScan: Int,
-            shouldCache: Bool
+            loadFromCache: Bool,
+            saveToCache: Bool
         ) {
-
             self.runContext = RunContext(
                 fileNameOfInputCorpus: fileNameOfInputCorpus,
                 numberOfLinesToScan: numberOfLinesToScan,
-                shouldCache: shouldCache
+                shouldLoadCachedInput: loadFromCache,
+                shouldCachedOutput: saveToCache
             )
-
         }
     }
 }
@@ -48,7 +48,7 @@ public extension BIP39.Creator {
 
         let result = try pipeline.work(input: runContext)
         let lines = result.lines.contents.prefix(runContext.numberOfLinesToScan)
-        print("🔮 Done with pipeline:\n🕐 \(pipeline) 🕤\nResult of pipeline #\(lines.count) lines, namely🎉:\n\n\(lines)\n")
+        print("🔮 Done with pipeline:\n🕐 \(pipeline) 🕤\nResult of pipeline #\(lines.count) lines.")
     }
 }
 
@@ -77,9 +77,10 @@ public extension BIP39.Creator {
             return value
         }
 
-        let input = try readValue(for: "input", map: { $0 })  ?? "Assets/Input/corpus_first_million_lines.txt"
-        let lineCount = try readValue(for: "lines") { Int($0) } ?? 2000
-        let cache = try readValue(for: "cache") { Bool($0) } ?? true
+        let input = try readValue(for: "input", map: { $0 })  ?? "Assets/Input/corpus_first_100k_lines.txt"
+        let lineCount = try readValue(for: "lines") { Int($0) } ?? 100_000
+        let loadFromCache = try readValue(for: "loadFromCache") { Bool($0) } ?? true
+        let saveToCache = try readValue(for: "saveToCache") { Bool($0) } ?? true
 
         if let argumentLeft = arguments.first {
             throw Error.unrecognizedArgument(name: argumentLeft.key, value: argumentLeft.value)
@@ -88,14 +89,14 @@ public extension BIP39.Creator {
         self.init(
             fileNameOfInputCorpus: input,
             numberOfLinesToScan: lineCount,
-            shouldCache: cache
+            loadFromCache: loadFromCache,
+            saveToCache: saveToCache
         )
     }
 
     convenience init(arguments: [String]) throws {
         // The first argument - `arguments[0]` - is the execution path
         let arguments = [String](arguments.dropFirst())
-        print("🇸🇪 \(arguments)")
 
         guard arguments.count % 2 == 0 else {
             throw Error.expectedEvenNumberOfArguments

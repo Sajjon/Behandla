@@ -11,6 +11,11 @@ import Foundation
 public struct NominatedLine: Hashable, Codable, CustomStringConvertible {
     let word: String
     let partOfSpeechTag: PartOfSpeech
+
+    init(word: String, partOfSpeechTag: PartOfSpeech) {
+        self.word = word
+        self.partOfSpeechTag = partOfSpeechTag
+    }
 }
 
 public extension NominatedLine {
@@ -21,7 +26,9 @@ public extension NominatedLine {
 
 extension NominatedLine {
     init(parsedLine: ParsedLine) {
-        self.word = parsedLine.wordForm.lowercasedWord
-        self.partOfSpeechTag = parsedLine.partOfSpeechTag
+        self.init(
+            word: parsedLine.wordForm.lowercasedWord,
+            partOfSpeechTag: parsedLine.partOfSpeechTag
+        )
     }
 }
