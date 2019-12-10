@@ -7,4 +7,5 @@
 
 import Foundation
 
+/// A line which word is confirmed as one of the 2048 BIP39 words.
 struct ConfirmedLine {}

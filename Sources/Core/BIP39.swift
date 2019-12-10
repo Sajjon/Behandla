@@ -41,23 +41,24 @@ public extension BIP39 {
 
 public extension BIP39.Creator {
     func createWordList() throws {
-        
-        print("Creating word list 🌈: scanCorpusContext: \(scanCorpusContext), shouldCache: \(shouldCache)")
+
+        print("🚀 Started jobs, scan context: \(scanCorpusContext), shouldCache: \(shouldCache)")
 
         let pipeline: Pipeline<ScanCorpusContext, String> = Pipeline {
-            ScanCorpusJob(shouldCache: self.shouldCache)
+            ScanJob(shouldCache: shouldCache)
+            ParseJob(shouldCache: shouldCache)
             AnnounceFinishedJob()
         }
 
         let result = try pipeline.work(input: scanCorpusContext)
-        print("🚀 result: \(result)")
+        print("🔮 Done with pipeline:\n🕐 \(pipeline) 🕤\nResult of pipeline 🎉:\n\n\(result)\n")
     }
 }
 
 struct AnnounceFinishedJob: Job {
-    typealias Input = ScannedLines
+    typealias Input = ParsedLines
     func work(input: Input) throws -> String {
-        "finished scanning #\(input.scannedLines.count) lines"
+        "finished parsing #\(input.parsedLines.count) lines, namely: \(input.parsedLines)"
     }
 }
 
@@ -138,10 +139,5 @@ public extension BIP39.Creator {
         )
 
         case unrecognizedArgument(name: String, value: String)
-//        case missingFileName
-//        case missingNumberOfLinesToRead
-//        case numberOfLinesToReadNotAnInteger
-//        case failedToReadFile(atPath: String)
-//        case expectedWordCount(of: Int, butGot: Int)
     }
 }

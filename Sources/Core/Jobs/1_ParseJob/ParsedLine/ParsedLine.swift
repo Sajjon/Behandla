@@ -8,6 +8,8 @@
 import Foundation
 
 
+/// A parsed line from some scanned line in the corpus.
+///
 /// Some lines from the corpus:
 ///
 ///     Word form   Part Of Speech              Base form(s)                Compound?   Occurences      Relative frequency
@@ -18,7 +20,7 @@ import Foundation
 ///     fler        JJ.POS.UTR+NEU.PLU.IND.NOM  |                           -           2909834         218.612109
 ///     kvinnor     NN.UTR.PLU.IND.NOM          |kvinna..nn.1|              +           2903606         218.144207
 ///
-public struct ParsedButNotYetProcessedLine: Codable, CustomStringConvertible, Hashable {
+public struct ParsedLine: Codable, CustomStringConvertible, Hashable {
 
     // MARK: - Properties
 
@@ -49,9 +51,9 @@ public struct ParsedButNotYetProcessedLine: Codable, CustomStringConvertible, Ha
     public let indexOfLineInCorpus: Int
 
     /// "Designated" initializer
-    public init(scannedLine: ScannedButNotYetParsedLine) throws {
+    public init(scannedLine: ScannedLine) throws {
 
-        let parts = scannedLine.unparsedLine.parts(separatedBy: Self.interLineDelimiter)
+        let parts = scannedLine.lineFromCorpus.parts(separatedBy: Self.interLineDelimiter)
 
         guard parts.count == Self.numberOfComponents else {
             throw WordError.unexpectedNumberOfComponents(got: parts.count, butExpected: Self.numberOfComponents)
@@ -81,7 +83,7 @@ public struct ParsedButNotYetProcessedLine: Codable, CustomStringConvertible, Ha
     }
 }
 
-public extension ParsedButNotYetProcessedLine {
+public extension ParsedLine {
 
     /// Character used to separate parts within the line
     static let interLineDelimiter: Character = "\t"
@@ -93,7 +95,7 @@ public extension ParsedButNotYetProcessedLine {
 }
 
 // MARK: CustomStringConvertible
-public extension ParsedButNotYetProcessedLine {
+public extension ParsedLine {
     var description: String {
         """
         \(wordForm), pos: \(partOfSpeechTag), lemgrams: \(lemgrams)

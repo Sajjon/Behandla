@@ -7,19 +7,19 @@
 
 import Foundation
 
-struct ParseJob: Job {
+struct ParseJob: CacheableJob {
     let shouldCache: Bool
 }
 
-// MARK: Job
+// MARK: CacheableJob
 extension ParseJob {
     typealias Input = ScannedLines
     typealias Output = ParsedLines
 
-    func work(input: Input) throws -> Output {
-        var parsedLines = OrderedSet<ParsedButNotYetProcessedLine>()
+    func newWork(input: Input) throws -> Output {
+        var parsedLines = OrderedSet<ParsedLine>()
         for scannedLine in input.scannedLines {
-            guard let parsedLine = try? ParsedButNotYetProcessedLine(scannedLine: scannedLine) else {
+            guard let parsedLine = try? ParsedLine(scannedLine: scannedLine) else {
                 continue
             }
 

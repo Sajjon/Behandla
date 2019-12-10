@@ -7,9 +7,18 @@
 
 import Foundation
 
-protocol Job {
+protocol NamedTask {
+    var name: String { get }
+}
+
+extension NamedTask {
+    var name: String {
+        .init(describing: Mirror(reflecting: self).subjectType)
+    }
+}
+
+protocol Job: NamedTask {
     associatedtype Input
     associatedtype Output
-
     func work(input: Input) throws -> Output
 }

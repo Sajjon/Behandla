@@ -7,10 +7,11 @@
 
 import Foundation
 
-struct Pipeline<Input, Output>: Job {
-
+struct Pipeline<Input, Output>: Job, CustomStringConvertible {
+    let description: String
     private let _getOutput: (Input) throws -> Output
-    fileprivate init(_ getOutput: @escaping (Input) throws -> Output) {
+    fileprivate init(description: String, _ getOutput: @escaping (Input) throws -> Output) {
+        self.description = description
         self._getOutput = getOutput
     }
 }
@@ -38,7 +39,7 @@ struct BuildPipeline {
         where
         A: Job
     {
-        Pipeline { input in
+        Pipeline(description: jobA.name) { input in
             try jobA.work(input: input)
         }
     }
@@ -48,35 +49,35 @@ struct BuildPipeline {
         A: Job, B: Job,
         A.Output == B.Input
     {
-        Pipeline {
+        Pipeline(description: descriptionOf(jobs: [a, b])) {
             try $0 |> a |> b
         }
     }
 
-    static func buildBlock<A, B, C>(_ a: A, b: B, c: C) -> Pipeline<A.Input, C.Output>
+    static func buildBlock<A, B, C>(_ a: A, _ b: B, _ c: C) -> Pipeline<A.Input, C.Output>
         where
         A: Job, B: Job, C: Job,
         A.Output == B.Input,
         B.Output == C.Input
     {
-        Pipeline {
+        Pipeline(description: descriptionOf(jobs: [a, b, c])) {
             try $0 |> a |> b |> c
         }
     }
 
-    static func buildBlock<A, B, C, D>(_ a: A, b: B, c: C, d: D) -> Pipeline<A.Input, D.Output>
+    static func buildBlock<A, B, C, D>(_ a: A, _ b: B, _ c: C, _ d: D) -> Pipeline<A.Input, D.Output>
         where
         A: Job, B: Job, C: Job, D: Job,
         A.Output == B.Input,
         B.Output == C.Input,
         C.Output == D.Input
     {
-        Pipeline {
+        Pipeline(description: descriptionOf(jobs: [a, b, c, d])) {
             try $0 |> a |> b |> c |> d
         }
     }
 
-    static func buildBlock<A, B, C, D, E>(_ a: A, b: B, c: C, d: D, e: E) -> Pipeline<A.Input, E.Output>
+    static func buildBlock<A, B, C, D, E>(_ a: A, _ b: B, _ c: C, _ d: D, _ e: E) -> Pipeline<A.Input, E.Output>
         where
         A: Job, B: Job, C: Job, D: Job, E: Job,
         A.Output == B.Input,
@@ -84,12 +85,12 @@ struct BuildPipeline {
         C.Output == D.Input,
         D.Output == E.Input
     {
-        Pipeline {
+        Pipeline(description: descriptionOf(jobs: [a, b, c, d, e])) {
             try $0 |> a |> b |> c |> d |> e
         }
     }
 
-    static func buildBlock<A, B, C, D, E, F>(_ a: A, b: B, c: C, d: D, e: E, f: F) -> Pipeline<A.Input, F.Output>
+    static func buildBlock<A, B, C, D, E, F>(_ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F) -> Pipeline<A.Input, F.Output>
         where
         A: Job, B: Job, C: Job, D: Job, E: Job, F: Job,
         A.Output == B.Input,
@@ -98,12 +99,12 @@ struct BuildPipeline {
         D.Output == E.Input,
         E.Output == F.Input
     {
-        Pipeline {
+        Pipeline(description: descriptionOf(jobs: [a, b, c, d, e, f])) {
             try $0 |> a |> b |> c |> d |> e |> f
         }
     }
 
-    static func buildBlock<A, B, C, D, E, F, G>(_ a: A, b: B, c: C, d: D, e: E, f: F, g: G) -> Pipeline<A.Input, G.Output>
+    static func buildBlock<A, B, C, D, E, F, G>(_ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G) -> Pipeline<A.Input, G.Output>
         where
         A: Job, B: Job, C: Job, D: Job, E: Job, F: Job, G: Job,
         A.Output == B.Input,
@@ -113,7 +114,7 @@ struct BuildPipeline {
         E.Output == F.Input,
         F.Output == G.Input
     {
-        Pipeline {
+        Pipeline(description: descriptionOf(jobs: [a, b, c, d, e, f, g])) {
             try $0 |> a |> b |> c |> d |> e |> f |> g
         }
     }
@@ -126,6 +127,10 @@ precedencegroup Pipe {
 }
 
 infix operator |>: Pipe
-func |> <J>(input: J.Input, job: J) throws -> J.Output where J: Job {
+private func |> <J>(input: J.Input, job: J) throws -> J.Output where J: Job {
     try job.work(input: input)
+}
+
+private func descriptionOf(jobs: [NamedTask]) -> String {
+    jobs.map { $0.name }.joined(separator: " |> ")
 }

@@ -10,9 +10,9 @@ import Foundation
 /// This is a parsed in memory version of the corpus.
 public struct ScannedLines: Hashable, Codable {
 
-    public let scannedLines: OrderedSet<ScannedButNotYetParsedLine>
+    public let scannedLines: OrderedSet<ScannedLine>
 
-    public init(scannedLines: OrderedSet<ScannedButNotYetParsedLine>, amount: Amount) {
+    public init(scannedLines: OrderedSet<ScannedLine>, amount: Amount) {
         self.scannedLines = scannedLines
     }
 }

@@ -8,11 +8,11 @@
 import Foundation
 
 /// This is a parsed in memory version of the corpus.
-public struct ParsedLines: Codable {
+public struct ParsedLines: Hashable, Codable {
 
-    public let parsedLines: OrderedSet<ParsedButNotYetProcessedLine>
+    public let parsedLines: OrderedSet<ParsedLine>
 
-    public init(parsedLines: OrderedSet<ParsedButNotYetProcessedLine>, amount: Amount) {
+    public init(parsedLines: OrderedSet<ParsedLine>, amount: Amount) {
         self.parsedLines = parsedLines
         print(amount)
     }

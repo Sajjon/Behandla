@@ -7,22 +7,27 @@
 
 import Foundation
 
-struct ScanCorpusJob {
+struct ScanJob {
 
     public let shouldCache: Bool
     public let announceEveryNthScannedLine = 100
 }
 
 // MARK: Job
-extension ScanCorpusJob: Job {
-    func work(input scanCorpusContext: ScanCorpusContext) throws -> ScannedLines {
-        let file = try openFile(named: scanCorpusContext.fileNameOfInputCorpus)
+extension ScanJob: CacheableJob {
+
+    typealias Input = ScanCorpusContext
+    typealias Output = ScannedLines
+
+    func newWork(input scanCorpusContext: Input) throws -> Output {
+        let file = try Cacher.currentDirectoryPath.openFile(named: scanCorpusContext.fileNameOfInputCorpus)
+
         let lineReader = try LineScanner(file: file)
 
         print("✅ Starting to scan lines")
 
         let numberOfLinesToScan = scanCorpusContext.numberOfLinesToScan
-        var scannedLines = OrderedSet<ScannedButNotYetParsedLine>()
+        var scannedLines = OrderedSet<ScannedLine>()
 
         for lineIndex in 0...numberOfLinesToScan {
 
@@ -38,36 +43,11 @@ extension ScanCorpusJob: Job {
                 return ScannedLines(scannedLines: scannedLines, amount: .notAllLinesParsed)
             }
 
-            let scannedLine = ScannedButNotYetParsedLine(unparsedLine: rawLine, positionInCorpus: lineIndex)
+            let scannedLine = ScannedLine(lineFromCorpus: rawLine, positionInCorpus: lineIndex)
+
             scannedLines.append(scannedLine)
         }
 
         return ScannedLines(scannedLines: scannedLines, amount: .allSpecifiedLinesWasParsed)
     }
-}
-
-
-private extension ScanCorpusJob {
-    func openFile(named fileName: String) throws -> FileHandle {
-        do {
-            let path = URL(fileURLWithPath: fileName)
-            return try FileHandle(forReadingFrom: path)
-        }  catch {
-            throw Error.failedToReadFile(atPath: fileName)
-        }
-    }
-
-}
-
-extension ScanCorpusJob {
-        enum Error: Swift.Error {
-
-            case failedToReadFile(atPath: String)
-
-//            case missingFileName
-//            case missingNumberOfLinesToRead
-//            case numberOfLinesToReadNotAnInteger
-//            case expectedWordCount(of: Int, butGot: Int)
-    }
-
 }

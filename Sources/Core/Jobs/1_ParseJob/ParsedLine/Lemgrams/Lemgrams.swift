@@ -7,9 +7,9 @@
 
 import Foundation
 
-public struct Lemgrams: Collection, Codable, Hashable {
+public struct Lemgrams: Collection, Codable, Hashable, CustomStringConvertible {
 
-    public let set: OrderedSet<Lemgram>
+    public let lemgramsSet: OrderedSet<Lemgram>
 
     /// Input is the third column in the line:
     /// `|land..nn.3|land..nn.2|land..nn.1|`
@@ -23,10 +23,15 @@ public struct Lemgrams: Collection, Codable, Hashable {
             lemgrams.append(lemgram)
         }
 
-        self.set = lemgrams
+        self.lemgramsSet = lemgrams
     }
 }
 
+public extension Lemgrams {
+    var description: String {
+        String(describing: contents)
+    }
+}
 
 public extension Lemgrams {
     static let delimiter: Character = "|"
@@ -42,7 +47,7 @@ public extension Lemgrams {
     init(from decoder: Decoder) throws {
         let singleValueContainer = try decoder.singleValueContainer()
         let array = try singleValueContainer.decode([Lemgram].self)
-        self.set = OrderedSet.init(array: array)
+        self.lemgramsSet = OrderedSet.init(array: array)
     }
 
 }
@@ -52,14 +57,14 @@ public extension Lemgrams {
     typealias Index = Int
 
 
-    var contents: [Lemgram] { self.set.contents }
+    var contents: [Lemgram] { lemgramsSet.contents }
     var startIndex: Index { contents.startIndex }
     var endIndex: Index { contents.endIndex }
 
     subscript(index: Index) -> Element { contents[index] }
 
     func index(after index: Index) -> Index {
-        set.index(after: index)
+        lemgramsSet.index(after: index)
     }
 
 }
