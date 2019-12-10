@@ -11,7 +11,6 @@ public enum BIP39 {}
 
 public extension BIP39 {
     static let minimumWordLength = 3
-    static let maximumWordLength = 10
     static let numberOfCharactersToUnambigiouslyIdentifyWord = 4
 }
 
@@ -47,6 +46,7 @@ public extension BIP39.Creator {
         let pipeline: Pipeline<ScanCorpusContext, String> = Pipeline {
             ScanJob(shouldCache: shouldCache)
             ParseJob(shouldCache: shouldCache)
+            NominateJob(shouldCache: shouldCache)
             AnnounceFinishedJob()
         }
 
@@ -56,9 +56,9 @@ public extension BIP39.Creator {
 }
 
 struct AnnounceFinishedJob: Job {
-    typealias Input = ParsedLines
+    typealias Input = NominatedLines
     func work(input: Input) throws -> String {
-        "finished parsing #\(input.parsedLines.count) lines, namely: \(input.parsedLines)"
+        "finished parsing #\(input.lines.count) lines, namely: \(input.lines)"
     }
 }
 

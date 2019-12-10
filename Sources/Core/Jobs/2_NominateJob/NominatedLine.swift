@@ -8,4 +8,20 @@
 import Foundation
 
 /// A line nominated for the short list of resulting BIP39 words (from lines).
-struct NominatedLine {}
+public struct NominatedLine: Hashable, Codable, CustomStringConvertible {
+    let word: String
+    let partOfSpeechTag: PartOfSpeech
+}
+
+public extension NominatedLine {
+    var description: String {
+        "\(word) (\(partOfSpeechTag))"
+    }
+}
+
+extension NominatedLine {
+    init(parsedLine: ParsedLine) {
+        self.word = parsedLine.wordForm.lowercasedWord
+        self.partOfSpeechTag = parsedLine.partOfSpeechTag
+    }
+}
