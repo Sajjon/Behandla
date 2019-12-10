@@ -17,10 +17,7 @@ public extension BIP39 {
 public extension BIP39 {
     final class Creator {
 
-        let scanCorpusContext: ScanCorpusContext
-
-        /// Whether or not we should cache intermediate results between runs
-        let shouldCache: Bool
+        let runContext: RunContext
 
         init(
             fileNameOfInputCorpus: String,
@@ -28,12 +25,12 @@ public extension BIP39 {
             shouldCache: Bool
         ) {
 
-            self.scanCorpusContext = ScanCorpusContext(
+            self.runContext = RunContext(
                 fileNameOfInputCorpus: fileNameOfInputCorpus,
-                numberOfLinesToScan: numberOfLinesToScan
+                numberOfLinesToScan: numberOfLinesToScan,
+                shouldCache: shouldCache
             )
 
-            self.shouldCache = shouldCache
         }
     }
 }
@@ -41,16 +38,17 @@ public extension BIP39 {
 public extension BIP39.Creator {
     func createWordList() throws {
 
-        print("🚀 Started jobs, scan context: \(scanCorpusContext), shouldCache: \(shouldCache)")
+        print("🚀 Started jobs, context: \(runContext)")
 
         let pipeline = Pipeline {
-            ScanJob(shouldCache: shouldCache)
-            ParseJob(shouldCache: shouldCache)
-            NominateJob(shouldCache: shouldCache)
+            ScanJob(runContext: runContext)
+            ParseJob(runContext: runContext)
+            NominateJob(runContext: runContext)
         }
 
-        let result = try pipeline.work(input: scanCorpusContext)
-        print("🔮 Done with pipeline:\n🕐 \(pipeline) 🕤\nResult of pipeline 🎉:\n\n\(result)\n")
+        let result = try pipeline.work(input: runContext)
+        let lines = result.lines.contents.prefix(runContext.numberOfLinesToScan)
+        print("🔮 Done with pipeline:\n🕐 \(pipeline) 🕤\nResult of pipeline #\(lines.count) lines, namely🎉:\n\n\(lines)\n")
     }
 }
 

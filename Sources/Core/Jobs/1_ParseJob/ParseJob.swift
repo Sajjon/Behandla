@@ -8,7 +8,7 @@
 import Foundation
 
 struct ParseJob: CacheableJob {
-    let shouldCache: Bool
+    let runContext: RunContext
 }
 
 // MARK: CacheableJob

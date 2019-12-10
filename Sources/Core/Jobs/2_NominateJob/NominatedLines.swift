@@ -8,10 +8,6 @@
 import Foundation
 
 /// This is a parsed in memory version of the corpus.
-public struct NominatedLines: Hashable, Codable, LinesCountable {
+public struct NominatedLines: Hashable, Codable {
     public let lines: OrderedSet<NominatedLine>
-}
-
-public extension NominatedLines {
-    var numberOfLines: Int { lines.count }
 }

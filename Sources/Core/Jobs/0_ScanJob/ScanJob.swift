@@ -9,24 +9,31 @@ import Foundation
 
 struct ScanJob {
 
-    public let shouldCache: Bool
+    public let runContext: RunContext
     public let announceEveryNthScannedLine = 100
 }
 
 // MARK: Job
 extension ScanJob: CacheableJob {
 
-    typealias Input = ScanCorpusContext
+    typealias Input = RunContext
     typealias Output = ScannedLines
 
-    func newWork(input scanCorpusContext: Input) throws -> Output {
-        let file = try Cacher.currentDirectoryPath.openFile(named: scanCorpusContext.fileNameOfInputCorpus)
+    func validateCached(_ cached: Output) throws {
+        guard cached.numberOfLines >= runContext.numberOfLinesToScan else {
+            throw Error.notEnoughLinesScanned
+        }
+    }
+
+    func newWork(input _: Input) throws -> Output {
+        let inputFileName = runContext.fileNameOfInputCorpus
+        let file = try Cacher.currentDirectoryPath.openFile(named: inputFileName)
 
         let lineReader = try LineScanner(file: file)
 
         print("✅ Starting to scan lines")
 
-        let numberOfLinesToScan = scanCorpusContext.numberOfLinesToScan
+        let numberOfLinesToScan = runContext.numberOfLinesToScan
         var scannedLines = OrderedSet<ScannedLine>()
 
         readlines: for lineIndex in 0...numberOfLinesToScan {

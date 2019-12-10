@@ -8,7 +8,7 @@
 import Foundation
 
 /// This is a parsed in memory version of the corpus.
-public struct ScannedLines: Hashable, Codable, LinesCountable {
+public struct ScannedLines: Hashable, Codable {
 
     public let scannedLines: OrderedSet<ScannedLine>
 

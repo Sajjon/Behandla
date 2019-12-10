@@ -17,10 +17,6 @@ extension NamedTask {
     }
 }
 
-protocol LinesCountable {
-    var numberOfLines: Int { get }
-}
-
 protocol Job: NamedTask {
     associatedtype Input
     associatedtype Output

@@ -64,7 +64,6 @@ extension Cacher {
             let path = URL(fileURLWithPath: fileUrlPath)
             return try FileHandle(forReadingFrom: path)
         }  catch {
-            print("⚠️ FileHandle.Error: \(error)")
             throw Error.failedToReadFile(atPath: fileName)
         }
     }

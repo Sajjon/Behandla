@@ -7,10 +7,11 @@
 
 import Foundation
 
-protocol CacheableJob: Job where Input: Codable & LinesCountable, Output: Codable & LinesCountable {
-    var shouldCache: Bool { get }
+protocol CacheableJob: Job where Output: Codable {
+    var runContext: RunContext { get }
     var fileName: String { get }
     func newWork(input: Input) throws -> Output
+    func validateCached(_ cached: Output) throws
 }
 
 extension CacheableJob {
@@ -23,21 +24,28 @@ extension CacheableJob {
         return name.lowercased() + ".json"
     }
 
+    /// Default, cached is good
+    func validateCached(_ cached: Output) throws {}
+
     func work(input: Input) throws -> Output {
         let cacher = Cacher()
-        if shouldCache, let cached: Output = try? cacher.load(name: fileName) {
-            if cached.numberOfLines >= input.numberOfLines {
-                print("💾 found and reusing cached data in: '\(fileName)'")
-                return cached
-            } else {
-                print("💔💾 found cached date, but only #\(cached.numberOfLines) lines, but current job `\(self.nameOfJob)` requested at least #\(input.numberOfLines) lines.")
-            }
+        let shouldLoadCachedInput = runContext.shouldLoadCachedInput
 
+        if shouldLoadCachedInput, let cached: Output = try? cacher.load(name: fileName) {
+            do {
+                try validateCached(cached)
+                print("🆗💾 found and reusing cached data in: '\(fileName)'")
+                return cached
+            } catch {
+                print("🙅‍♀️💾 found cached date, but is invalid \(error), changing `shouldLoadCachedInput` to false")
+                runContext.shouldLoadCachedInput = false
+            }
         }
 
         let newOutput = try newWork(input: input)
 
-        if shouldCache {
+        if runContext.shouldCachedOutput {
+            print("🆕💾 caching new output of job: \(nameOfJob)")
             try cacher.save(newOutput, name: fileName)
         }
         return newOutput
