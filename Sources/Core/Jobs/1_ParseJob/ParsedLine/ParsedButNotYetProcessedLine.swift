@@ -7,6 +7,7 @@
 
 import Foundation
 
+
 /// Some lines from the corpus:
 ///
 ///     Word form   Part Of Speech              Base form(s)                Compound?   Occurences      Relative frequency
@@ -17,7 +18,7 @@ import Foundation
 ///     fler        JJ.POS.UTR+NEU.PLU.IND.NOM  |                           -           2909834         218.612109
 ///     kvinnor     NN.UTR.PLU.IND.NOM          |kvinna..nn.1|              +           2903606         218.144207
 ///
-public final class Line: Codable, CustomStringConvertible, Hashable, Comparable {
+public struct ParsedButNotYetProcessedLine: Codable, CustomStringConvertible, Hashable {
 
     // MARK: - Properties
 
@@ -30,7 +31,7 @@ public final class Line: Codable, CustomStringConvertible, Hashable, Comparable 
     public let partOfSpeechTag: PartOfSpeech
 
     /// Base form(s) of word
-    public let canonicalFormsOfWord: CanonicalFormsOfWord
+    public let lemgrams: Lemgrams
 
     /// Whether this is a compound word or not, an example of a compound word is 🇸🇪_"stämband"_,
     /// consisting of the word _"stäm"_ and the word _"band"_.
@@ -47,46 +48,40 @@ public final class Line: Codable, CustomStringConvertible, Hashable, Comparable 
     /// The index of this parsed line in the corpus
     public let indexOfLineInCorpus: Int
 
-    /// The index of this line instance in the collection of non-rejected lines.
-    public let index: Int
-
     /// "Designated" initializer
-    public init?(unparsedReadLine: UnparsedReadLine) throws {
+    public init(scannedLine: ScannedButNotYetParsedLine) throws {
 
-        let parts = unparsedReadLine.unparsedLine.parts(separatedBy: Self.interLineDelimiter)
+        let parts = scannedLine.unparsedLine.parts(separatedBy: Self.interLineDelimiter)
 
         guard parts.count == Self.numberOfComponents else {
-            throw Error.unexpectedNumberOfComponents(got: parts.count)
+            throw WordError.unexpectedNumberOfComponents(got: parts.count, butExpected: Self.numberOfComponents)
         }
 
 
-        do {
-            self.word = try WordForm(linePart: parts[0])
-        } catch let wordError as Word.Error {
-            print("Skipped word: '\(parts[0])' (due to: \(wordError)")
-            return nil
-        }
+        self.wordForm = try WordForm(linePart: parts[0])
 
         self.partOfSpeechTag = try PartOfSpeech(linePart: parts[1])
-        self.canonicalFormsOfWord = try CanonicalFormsOfWord(linePart: parts[2])
+        self.lemgrams = try Lemgrams(linePart: parts[2])
 
         /// We expect the fourth part to just be a dash separating parts from numbers specifying occurences
         self.isCompoundWord = try IsCompoundWord(linePart: parts[3]).isCompoundWord
 
         guard let numberOfOccurencesInCorpus = Int(parts[4]) else {
-            throw Error.stringNotAnInteger(parts[4])
+            throw WordError.stringNotAnInteger(parts[4])
         }
 
         self.numberOfOccurencesInCorpus = numberOfOccurencesInCorpus
 
         guard let relativeFrequencyPerOneMillion = Double(parts[5]) else {
-            throw Error.stringNotADouble(parts[5])
+            throw WordError.stringNotADouble(parts[5])
         }
         self.relativeFrequencyPerOneMillion = relativeFrequencyPerOneMillion
+
+        self.indexOfLineInCorpus = scannedLine.positionInCorpus
     }
 }
 
-public extension Line {
+public extension ParsedButNotYetProcessedLine {
 
     /// Character used to separate parts within the line
     static let interLineDelimiter: Character = "\t"
@@ -97,60 +92,11 @@ public extension Line {
     static let numberOfComponents: Int = 6
 }
 
-// MARK: Error
-public extension Line {
-    enum Error: Swift.Error {
-
-        case unexpectedNumberOfComponents(
-            got: Int,
-            butExpected: Int = Line.numberOfComponents
-        )
-
-        case stringNotAnInteger(String)
-        case stringNotADouble(String)
-    }
-}
-
-// MARK: Equtable
-public extension Line {
-    static func == (lhs: Line, rhs: Line) -> Bool {
-        lhs.word == rhs.word
-    }
-}
-
-
-// MARK: Hashable
-public extension Line {
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(word)
-    }
-}
-
-// MARK: Comparable
-public extension Line {
-    static func < (lhs: Line, rhs: Line) -> Bool {
-        lhs.word < rhs.word
-    }
-}
-
 // MARK: CustomStringConvertible
-public extension Line {
+public extension ParsedButNotYetProcessedLine {
     var description: String {
         """
-        \(word), pos: \(partOfSpeechTags), base: [\(canonicalFormsOfWord)]
+        \(wordForm), pos: \(partOfSpeechTag), lemgrams: \(lemgrams)
         """
-    }
-}
-
-// MARK: Codable
-public extension Line {
-    enum CodingKeys: String, CodingKey {
-
-        case partOfSpeechTags = "posTags"
-        case canonicalFormsOfWord = "base"
-        case numberOfOccurencesInCorpus = "occurences"
-
-        case lines
-        case word
     }
 }

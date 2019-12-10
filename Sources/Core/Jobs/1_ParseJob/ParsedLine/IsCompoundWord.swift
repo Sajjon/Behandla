@@ -14,7 +14,7 @@ public struct IsCompoundWord {
         guard string == "+" || string == "-" else {
             throw Error.expectedMinusOrPlus(butGot: string)
         }
-        self.isCompoundWord == "+"
+        self.isCompoundWord = string == "+"
     }
 }
 

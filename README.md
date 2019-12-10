@@ -91,7 +91,7 @@ My assumption/theory/idea is that a word at frequency index `i` with only one me
 ### Homograph
 A homograph is a word with the same spelling but different pronouncation, e.g. 🇸🇪: _"banan"_, which can mean 🇬🇧: _"the lane" or 🇬🇧: _"the banana"_. Since homographs are a subset of homonyms they are welcome. In fact a homonym being a homograph might be even better for creating different associations than a non-homographical homonym.
 
-Here is a good online tool to check meanings of Swedish words: https://spraakbanken.gu.se/ws/saldo-ws/fl/html/banan
+[Here is a good online tool to check meanings of Swedish words](https://spraakbanken.gu.se/ws/saldo-ws/fl/html/banan)
 
 ## Homophones 👎
 Homophones are words with different spelling, but same pronouncation. E.g 🇸🇪: _"egg"_ and 🇸🇪: _"ägg"_  (🇬🇧: _"edge"_ (🔪) and _"egg"_(🥚) respectively). My theory is that this makes it harder to remember (since spelling matters). 

@@ -1,5 +1,5 @@
 //
-//  LineReader.swift
+//  LineScanner.swift
 //  
 //
 //  Created by Alexander Cyon on 2019-10-23.
@@ -8,7 +8,7 @@
 import Foundation
 
 // https://github.com/RMJay/LineReader/blob/master/LineReader/LineReader.swift
-internal final class LineReader  {
+internal final class LineScanner  {
 
     let encoding: String.Encoding
     let chunkSize: Int
@@ -70,7 +70,7 @@ internal final class LineReader  {
 
 }
 
-extension LineReader: Sequence {
+extension LineScanner: Sequence {
     public func makeIterator() -> AnyIterator<String> {
         return AnyIterator {
             return self.nextLine()

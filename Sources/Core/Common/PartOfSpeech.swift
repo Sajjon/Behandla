@@ -41,7 +41,7 @@ import Foundation
 /// [1]: https://spraakbanken.gu.se/korp/markup/msdtags.html
 /// [2]: https://www.ling.su.se/polopoly_fs/1.89313.1337935966!/menu/standard/file/parole_format_suc_tagset.pdf
 ///
-public enum PartOfSpeech: String, CaseIterable, Equatable, CustomStringConvertible, Codable {
+public enum PartOfSpeech: String, CaseIterable, Hashable, CustomStringConvertible, Codable {
 
     /// 🇸🇪: `Adverb`, e.g. "inte" (🇬🇧: "not")
     case adverb = "AB"
