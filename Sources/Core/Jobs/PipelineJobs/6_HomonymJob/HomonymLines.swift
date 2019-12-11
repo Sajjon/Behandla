@@ -8,10 +8,10 @@
 import Foundation
 
 /// Lines which have been elected for confirmation.
-typealias ElectedLines = Lines<ElectedLine>
+typealias HomonymLines = Lines<HomonymLine>
 
-extension Lines: CustomStringConvertible where Line == ElectedLine {}
-extension Lines where Line == ElectedLine {
+extension Lines: CustomStringConvertible where Line == HomonymLine {}
+extension Lines where Line == HomonymLine {
     var description: String {
         lines.map {
             [String?]([

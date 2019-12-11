@@ -32,10 +32,8 @@ extension IncludeIf {
 
         let nameOfRule: String
         private let includeLineIf: IncludeLineIf
-        let isCompound: Bool
-        init(name: String = #function, isCompound: Bool = false, includeLineIf: @escaping IncludeLineIf) {
+        init(name: String = #function, includeLineIf: @escaping IncludeLineIf) {
             self.nameOfRule = name
-            self.isCompound = isCompound
             self.includeLineIf = includeLineIf
         }
     }
@@ -44,7 +42,7 @@ extension IncludeIf {
 extension IncludeIf.Rule {
     func isLineGood(_ line: Line) -> Bool {
         let included = includeLineIf(line)
-        if !included && !isCompound {
+        if !included {
             //            print("👎 \(nameOfRule): <\(line)>")
         }
         return included

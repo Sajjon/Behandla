@@ -7,5 +7,5 @@
 
 import Foundation
 
-/// Lines which have been nominated
-typealias NominatedLines = Lines<NominatedLine>
+/// Lines where words have suitable length
+typealias WordLengthLines = Lines<WordLengthLine>

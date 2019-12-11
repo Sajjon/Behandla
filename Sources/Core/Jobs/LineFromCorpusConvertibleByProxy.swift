@@ -8,8 +8,8 @@
 import Foundation
 
 protocol LineFromCorpusConvertibleByProxy: LineFromCorpusConvertible {
-    associatedtype Line: LineFromCorpusConvertible
-    var line: Line { get }
+    associatedtype FromLine: LineFromCorpusConvertible
+    var line: FromLine { get }
 }
 
 extension LineFromCorpusConvertibleByProxy {

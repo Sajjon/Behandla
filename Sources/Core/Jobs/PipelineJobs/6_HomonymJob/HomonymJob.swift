@@ -10,32 +10,32 @@ import Rainbow
 
 /// Based on nominated lines we perform computation heavy logic on the words, such as finding homonyms. Ranking lines based on a balance between frequency and homonym count according
 /// to some function
-struct ElectJob: CacheableJob {
+struct HomonymJob: CacheableJob {
     let runContext: RunContext
 }
 
 
 // MARK: CacheableJob
-extension ElectJob {
-    typealias Input = NominatedLines
-    typealias Output = ElectedLines
+extension HomonymJob {
+    typealias Input = WhitelistedPOSTagLines
+    typealias Output = HomonymLines
 
-    func newWork(input nominatedLines: Input) throws -> Output {
+    func newWork(input: Input) throws -> Output {
         let maxLineCount = 35_000
-        guard nominatedLines.count < maxLineCount else {
-            fatalError("This job is extremely slow, should not be run with more than #\(maxLineCount) lines, but got: #\(nominatedLines.count) lines")
+        guard input.count < maxLineCount else {
+            fatalError("This job is extremely slow, should not be run with more than #\(maxLineCount) lines, but got: #\(input.count) lines")
         }
 
         let homonymsBuilder = HomonymsBuilder()
-        for line in nominatedLines {
+        for line in input {
             homonymsBuilder.add(line: line)
         }
         let homonyms = homonymsBuilder.build()
         print(homonyms)
         let homonymsByWord = homonyms.forWord
 
-        var rankedLinesUnsorted = [(line: NominatedLine, rank: Rank, homonym: Homonym?)]()
-        for line in nominatedLines {
+        var rankedLinesUnsorted = [(line: WhitelistedPOSTagLine, rank: Rank, homonym: Homonym?)]()
+        for line in input {
             let homonym = homonymsByWord[line.wordForm]
             let rank = rankLine(line, homonym: homonym)
             rankedLinesUnsorted.append((line: line, rank: rank, homonym: homonym))
@@ -43,15 +43,15 @@ extension ElectJob {
 
         let rankedLines = rankedLinesUnsorted.sorted(by: { $0.rank > $1.rank })
 
-        let electedLines = rankedLines.prefix(100).map { ElectedLine(line: $0.line, rank: $0.rank, homonym: $0.homonym) }
+        let electedLines = rankedLines.prefix(100).map { HomonymLine(line: $0.line, rank: $0.rank, homonym: $0.homonym) }
 
-        let result = ElectedLines(electedLines)
+        let result = HomonymLines(electedLines)
         printRankFormula()
         print(result)
         return result
     }
 
-    func validateCached(_ cached: ElectedLines) throws {
+    func validateCached(_ cached: HomonymLines) throws {
         struct NotDone: Swift.Error {}
         throw NotDone()
     }
@@ -60,7 +60,7 @@ extension ElectJob {
 
 // MARK: - Private
 private let ℏ: Double = 0.6
-private extension ElectJob {
+private extension HomonymJob {
 
     ///
     /// Rank is based on number of occurences in corpus (`#occ`) and `#meanings` (homonyms)
@@ -68,7 +68,7 @@ private extension ElectJob {
     ///
     ///     `#occ * (1 + ℏ * #meanings)`
     ///
-    func rankLine(_ line: LineFromCorpus, homonym: Homonym?) -> Rank {
+    func rankLine(_ line: LineFromCorpusConvertible, homonym: Homonym?) -> Rank {
         let numberOfOccurencesInCorpus = Double(line.numberOfOccurencesInCorpus)
         var points = numberOfOccurencesInCorpus
         if let homonym = homonym {

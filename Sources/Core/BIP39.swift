@@ -52,8 +52,9 @@ public extension BIP39.Creator {
         let pipeline = Pipeline {
             ScanJob(runContext: runContext)
             ParseJob(runContext: runContext)
-            NominateJob(runContext: runContext)
-            ElectJob(runContext: runContext)
+            WordLengthJob(runContext: runContext)
+            WhitelistedPOSTagsJob(runContext: runContext)
+            HomonymJob(runContext: runContext)
         }
 
         let result = try pipeline.work(input: runContext)

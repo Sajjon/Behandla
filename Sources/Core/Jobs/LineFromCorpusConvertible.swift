@@ -47,3 +47,16 @@ extension LineFromCorpusConvertible {
     var wordLength: Int { wordForm.lowercasedWord.count }
 }
 
+// MARK: Encodable
+extension LineFromCorpusConvertible {
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: LineCodingKeys.self)
+        try container.encode(wordForm, forKey: .wordForm)
+        try container.encode(partOfSpeechTag, forKey: .partOfSpeechTag)
+        try container.encode(lemgrams, forKey: .lemgrams)
+        try container.encode(isCompoundWord, forKey: .isCompoundWord)
+        try container.encode(numberOfOccurencesInCorpus, forKey: .numberOfOccurencesInCorpus)
+        try container.encode(relativeFrequencyPerOneMillion, forKey: .relativeFrequencyPerOneMillion)
+        try container.encode(indexOfLineInCorpus, forKey: .indexOfLineInCorpus)
+    }
+}

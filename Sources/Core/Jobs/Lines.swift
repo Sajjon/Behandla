@@ -7,9 +7,11 @@
 
 import Foundation
 
-//typealias Lines<Line> = LinesWithContext<Line, Void> where Line: LineFromCorpusConvertible
+protocol LinesConvertible: ExpressibleByCollection where Element: LineFromCorpusConvertible, Line == Element {
+    associatedtype Line
+}
 
-struct Lines<Line>: ExpressibleByCollection, Codable where Line: LineFromCorpusConvertible {
+struct Lines<Line>: LinesConvertible, Codable where Line: LineFromCorpusConvertible {
 
     typealias Element = Line
 

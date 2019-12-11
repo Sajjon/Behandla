@@ -14,7 +14,7 @@ final class HomonymsBuilder {
 
 }
 extension HomonymsBuilder {
-    func add(line: LineFromCorpus) {
+    func add(line: LineFromCorpusConvertible) {
         let word = line.wordForm
         var meanings: MeaningsOfWord = map[word] ?? MeaningsOfWord(for: word, lemgrams: line.lemgrams)
         meanings.append(pos: line.partOfSpeechTag, lemgrams: line.lemgrams)

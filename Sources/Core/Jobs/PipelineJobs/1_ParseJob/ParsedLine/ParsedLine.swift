@@ -8,7 +8,7 @@
 import Foundation
 
 /// A parsed line from some scanned line in the corpus.
-struct ParsedLine: LineFromCorpus, Codable, Hashable {
+struct ParsedLine: LineFromCorpusComponents, Codable, Hashable {
 
     // MARK: - Properties
 
