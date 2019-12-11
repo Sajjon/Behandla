@@ -16,10 +16,10 @@ extension ParseJob {
     typealias Input = ScannedLines
     typealias Output = ParsedLines
 
-    func newWork(input scannedLine: Input) throws -> Output {
-        var parsedLines = OrderedSet<ParsedLine>()
+    func newWork(input: Input) throws -> Output {
+        var parsedLines = [ParsedLine]()
 
-        for scannedLine in scannedLine {
+        for scannedLine in input.contents {
             guard let parsedLine = try? ParsedLine.fromScannedLine(scannedLine) else {
                 continue
             }

@@ -38,7 +38,14 @@ extension ParsedLine {
         let wordForm = try WordForm(linePart: parts[0])
 
         let partOfSpeechTag = try PartOfSpeech(linePart: parts[1])
-        let lemgrams = try Lemgrams(linePart: parts[2])
+        let lemgrams: Lemgrams
+
+        do {
+           lemgrams = try Lemgrams(linePart: parts[2])
+        } catch {
+            let lemgram = Lemgram(wordForm: wordForm, partOfSpeech: partOfSpeechTag)
+            lemgrams = Lemgrams(single: lemgram)
+        }
 
         /// We expect the fourth part to just be a dash separating parts from numbers specifying occurences
         let isCompoundWord = try IsCompoundWord(linePart: parts[3]).isCompoundWord

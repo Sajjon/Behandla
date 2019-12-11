@@ -12,6 +12,12 @@ struct Lemgram: CustomStringConvertible, Hashable, Codable {
     private let p: PartOfSpeech
     private let i: Int
 
+    init(baseForm: BaseForm, partOfSpeech: PartOfSpeech, index: Int = 0) {
+        self.b = baseForm
+        self.p = partOfSpeech
+        self.i = index
+    }
+
     /// Expects a `{word}..{pos}.{index}` format, i.e. any `|` should already have been removed.
     init(linePart string: String) throws {
         let components = string.components(separatedBy: "..")
@@ -31,12 +37,11 @@ struct Lemgram: CustomStringConvertible, Hashable, Codable {
             throw WordError.stringNotAnInteger(posAndIndexComponents[1])
         }
 
-
-        self.b = try BaseForm(linePart: word)
-
-        self.p = try PartOfSpeech(linePart: posAndIndexComponents[0].uppercased())
-
-        self.i = index
+        self.init(
+            baseForm: try BaseForm(linePart: word),
+            partOfSpeech: try PartOfSpeech(linePart: posAndIndexComponents[0]),
+            index: index
+        )
     }
 }
 
@@ -47,6 +52,23 @@ extension Lemgram {
     var index: Int { i }
 }
 
+// MARK: Equatable
+extension Lemgram {
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        // omit `index`
+        lhs.baseForm == rhs.baseForm && lhs.partOfSpeech == rhs.partOfSpeech
+    }
+}
+
+// MARK: Hashable
+extension Lemgram {
+    func hash(into hasher: inout Hasher) {
+        // omit `index`
+        hasher.combine(baseForm)
+        hasher.combine(partOfSpeech)
+    }
+}
+
 extension Lemgram {
     struct BaseForm: WordFromString, Codable, Hashable {
         private let w: String
@@ -54,6 +76,21 @@ extension Lemgram {
         init(linePart anyCase: String) throws {
             self.w = try Self.from(unvalidatedString: anyCase)
         }
+
+        init(wordForm: WordForm) {
+            self.w = wordForm.lowercasedWord
+        }
+    }
+}
+
+extension Lemgram {
+
+    init(wordForm: WordForm, partOfSpeech: PartOfSpeech, index: Int = 0) {
+        self.init(
+            baseForm: BaseForm(wordForm: wordForm),
+            partOfSpeech: partOfSpeech,
+            index: index
+        )
     }
 }
 
@@ -64,7 +101,7 @@ extension Lemgram.BaseForm {
 extension Lemgram {
     var description: String {
         """
-        \(index): \(baseForm.word) (\(partOfSpeech))
+        \(baseForm.word) (\(partOfSpeech))
         """
     }
 }

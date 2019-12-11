@@ -7,7 +7,13 @@
 
 import Foundation
 
-struct WordForm: WordFromString, CustomStringConvertible, Hashable, Comparable, Codable {
+struct WordForm:
+    WordFromString,
+    CustomStringConvertible,
+    Hashable,
+    Codable,
+    ExpressibleByStringLiteral
+{
 
     let lowercasedWord: String
 
@@ -16,27 +22,32 @@ struct WordForm: WordFromString, CustomStringConvertible, Hashable, Comparable, 
     }
 }
 
+
+// MARK: ExpressibleByStringLiteral
+extension WordForm {
+    init(stringLiteral string: String) {
+        do {
+            try self.init(linePart: string)
+        } catch {
+            fatalError("Bad literal: \(error)")
+        }
+    }
+}
+
 // MARK: CustomStringConvertible
 extension WordForm {
     var description: String { lowercasedWord }
 }
 
-// MARK: Comparable
-extension WordForm {
-    static func < (lhs: WordForm, rhs: WordForm) -> Bool {
-        lhs.lowercasedWord < rhs.lowercasedWord
-    }
-}
-
-// MARK: Hashabble
-extension WordForm {
-    func hash(into hasher: inout Hasher) {
-        // We only care about the first characters, since we need to be able to disambituate fast.
-        let prefix = String(lowercasedWord.prefix(BIP39.numberOfCharactersToUnambigiouslyIdentifyWord))
-
-        hasher.combine(prefix)
-    }
-}
+//// MARK: Hashable
+//extension WordForm {
+//    func hash(into hasher: inout Hasher) {
+//        // We only care about the first characters, since we need to be able to disambituate fast.
+//        let prefix = String(lowercasedWord.prefix(BIP39.numberOfCharactersToUnambigiouslyIdentifyWord))
+//
+//        hasher.combine(prefix)
+//    }
+//}
 
 extension WordForm {
 

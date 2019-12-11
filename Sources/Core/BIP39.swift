@@ -12,6 +12,12 @@ public enum BIP39 {}
 
 extension BIP39 {
     static let minimumWordLength = 3
+
+    /// BIP39 standard is in fact max of 8, but some languages deviate from this. Since
+    /// Swedish is a languages using compound words a lot and words are in general quite lone
+    /// we use a bigger max length.
+    static let maximumWordLength = 11
+
     static let numberOfCharactersToUnambigiouslyIdentifyWord = 4
 }
 
@@ -82,9 +88,9 @@ public extension BIP39.Creator {
         }
 
         let input = try readValue(for: "input", map: { $0 })  ?? "Assets/Input/corpus_first_100k_lines.txt"
-        let lineCount = try readValue(for: "lines") { Int($0) } ?? 100_000
-        let loadFromCache = try readValue(for: "loadFromCache") { Bool($0) } ?? true
-        let saveToCache = try readValue(for: "saveToCache") { Bool($0) } ?? true
+        let lineCount = try readValue(for: "lines") { Int($0) } ?? 50_000
+        let loadFromCache = try readValue(for: "load") { Bool($0) } ?? true
+        let saveToCache = try readValue(for: "save") { Bool($0) } ?? true
 
         if let argumentLeft = arguments.first {
             throw Error.unrecognizedArgument(name: argumentLeft.key, value: argumentLeft.value)

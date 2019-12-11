@@ -8,14 +8,38 @@
 import Foundation
 
 /// A line that has advanced from the nominated short list of lines, awaiting confirmation of becomming part of the 2048 BIP39 words.
-struct ElectedLine: LineFromCorpus, Hashable {
-    let wordForm: WordForm
-    let partOfSpeechTag: PartOfSpeech
-    let lemgrams: Lemgrams
-    let isCompoundWord: Bool
-    let numberOfOccurencesInCorpus: Int
-    let relativeFrequencyPerOneMillion: Int
+struct ElectedLine: LineFromCorpusConvertibleByProxy, Hashable {
+    typealias Line = NominatedLine
+    let line: Line
+    let rank: Rank
+    let homonym: Homonym?
+}
 
-    // MARK: Meta properties
-    let indexOfLineInCorpus: Int
+
+extension ElectedLine {
+    var isHomonym: Bool {
+        homonym != nil
+    }
+}
+
+// MARK: CustomStringConvertible
+extension ElectedLine {
+    var description: String {
+        "rank: \(rank) - \(descriptionOfWord(wordForm, lemgrams: lemgrams))"
+    }
+}
+
+// MARK: Equatable
+extension ElectedLine {
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.line == rhs.line
+    }
+
+}
+
+// MARK: Hashable
+extension ElectedLine {
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(line)
+    }
 }

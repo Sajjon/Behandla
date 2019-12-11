@@ -17,9 +17,9 @@ extension NominateJob {
     typealias Output = NominatedLines
 
     func newWork(input parsedLines: Input) throws -> Output {
-        var nominatedLines = OrderedSet<NominatedLine>()
+        var nominatedLines = [NominatedLine]()
 
-        let matcher: IncludeIf = [
+        let matcher: IncludeIf<ParsedLine> = [
             .wordHasGoodLength,
             .partOfSpeechIsWhitelisted,
         ]
@@ -33,57 +33,18 @@ extension NominateJob {
         }
         return NominatedLines(nominatedLines)
     }
-}
 
-struct IncludeIf: ExpressibleByArrayLiteral {
-    let rules: [Rule]
-    init(rules: [Rule]) {
-        self.rules = rules
-    }
-    init(arrayLiteral rules: Rule...) {
-        self.init(rules: rules)
-    }
 }
 
 
-extension IncludeIf {
-    func checkIfLineShouldBeIncluded(line: ParsedLine) -> Bool {
-        rules.allSatisfy { $0.isLineGood(line) }
-    }
-}
-
-extension IncludeIf {
-    struct Rule {
-        typealias IncludeLineIf = (ParsedLine) -> Bool
-
-        let nameOfRule: String
-        private let includeLineIf: IncludeLineIf
-        let isCompound: Bool
-        init(name: String = #function, isCompound: Bool = false, includeLineIf: @escaping IncludeLineIf) {
-            self.nameOfRule = name
-            self.isCompound = isCompound
-            self.includeLineIf = includeLineIf
-        }
-    }
-}
-
-extension IncludeIf.Rule {
-    func isLineGood(_ line: ParsedLine) -> Bool {
-        let included = includeLineIf(line)
-        if !included && !isCompound {
-//            print("👎 \(nameOfRule): <\(line)>")
-        }
-        return included
-    }
-}
-
-extension IncludeIf.Rule {
+// MARK: IncludeIf Rules
+private extension IncludeIf.Rule {
     static var wordIsNotTooShort: Self {
-        Self { $0.lengthOfWordForm >= BIP39.minimumWordLength }
+        Self { $0.wordLength >= BIP39.minimumWordLength }
     }
 
     static var wordIsNotTooLong: Self {
-        Self { $0.lengthOfWordForm <= 11 }
+        Self { $0.wordLength <= BIP39.maximumWordLength }
     }
 
     static var wordHasGoodLength: Self {
@@ -97,10 +58,7 @@ extension IncludeIf.Rule {
     }
 }
 
-private extension ParsedLine {
-    var lengthOfWordForm: Int { wordForm.lowercasedWord.count }
-}
-
+// MARK: Whitelist POS
 extension Set where Element == PartOfSpeech {
     static var whitelisted: Set<PartOfSpeech> {
         return Set([

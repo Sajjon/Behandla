@@ -32,7 +32,7 @@ extension ScanJob: CacheableJob {
         print("✅ Starting to scan lines")
 
         let numberOfLinesToScan = runContext.numberOfLinesToScan
-        var scannedLines = OrderedSet<ScannedLine>()
+        var scannedLines = [ScannedLine]()
 
         readlines: for lineIndex in 0...numberOfLinesToScan {
 

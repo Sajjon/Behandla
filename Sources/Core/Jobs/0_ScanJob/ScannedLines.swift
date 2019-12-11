@@ -8,4 +8,14 @@
 import Foundation
 
 /// This is a scanned in memory version of the corpus
-typealias ScannedLines = Lines<ScannedLine>
+struct ScannedLines: Codable {
+
+    let contents: [ScannedLine]
+    init(_ lines: [ScannedLine]) {
+        self.contents = lines
+    }
+}
+
+extension ScannedLines {
+    var numberOfLines: Int { contents.count }
+}

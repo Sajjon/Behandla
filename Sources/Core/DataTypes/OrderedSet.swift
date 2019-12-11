@@ -125,6 +125,18 @@ extension OrderedSet {
         }
         return inserted
     }
+
+    /// Adds element of a sequence to the ordered set.
+    ///
+    /// - returns: True if all the items were inserted.
+    @discardableResult
+    mutating func append<S>(contentsOf elements: S) -> Bool where S: Sequence, S.Element == Element {
+        var allInserted = true
+        for element in elements {
+            allInserted = allInserted && self.append(element)
+        }
+        return allInserted
+    }
     
     /// Remove and return the element at the beginning of the ordered set.
     mutating func removeFirst() -> Element {

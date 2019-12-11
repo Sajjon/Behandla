@@ -7,6 +7,8 @@
 
 import Foundation
 
+// MARK: POS Tags
+
 ///
 /// View the full legend of Part of Speech (POS) tags [here][1], or a more comprehensive one with examples [here][2].
 ///
@@ -28,7 +30,7 @@ import Foundation
 ///     PM      | Egennamn                      | 'Mats'    | Proper Noun
 ///     PN      | Pronomen                      | 'hon'     | Pronoun
 ///     PP      | Preposition                   | 'av'      | Preposition
-///     PS      | Pos pronomen                  | 'hennes'  | Possessive
+///     PS      | Possessivt pronomen           | 'hennes'  | Possessive
 ///     RG      | Grundtal                      | 'tre'     | Cardinal number
 ///     RO      | Ordningstal                   | 'tredje'  | Ordinal number
 ///     SN      | Subjunktion                   | 'att'     | Subjunction
@@ -39,7 +41,7 @@ import Foundation
 ///     PAD     | Interpunktion                 | '"'       | Pairwise Delimiter
 ///
 /// [1]: https://spraakbanken.gu.se/korp/markup/msdtags.html
-/// [2]: https://www.ling.su.se/polopoly_fs/1.89313.1337935966!/menu/standard/file/parole_format_suc_tagset.pdf
+/// [2]:  https://www.ling.su.se/polopoly_fs/1.89313.1337935966!/menu/standard/file/parole_format_suc_tagset.pdf
 ///
 enum PartOfSpeech: String, CaseIterable, Hashable, CustomStringConvertible, Codable {
 
@@ -111,7 +113,15 @@ enum PartOfSpeech: String, CaseIterable, Hashable, CustomStringConvertible, Coda
 
 }
 
+// MARK: Init+String
 extension PartOfSpeech {
+
+    init?(string anyCase: String) {
+        guard let pos = PartOfSpeech(rawValue: anyCase) ?? PartOfSpeech(rawValue: anyCase.uppercased()) else {
+            return nil
+        }
+        self = pos
+    }
 
     /// String is on unparsed format: `PN.UTR.SIN.DEF.SUB`
     /// We only deal with the first part of the tag, i.e. `PN` from the line above
@@ -119,12 +129,12 @@ extension PartOfSpeech {
 
         let parts = string.parts(separatedBy: Self.delimiter)
 
-        guard let firstPos = parts.first else { throw Error.stringContainedNoPos }
+        guard let posString = parts.first else { throw Error.stringContainedNoPos }
 
-        guard let posTag = PartOfSpeech(rawValue: String(firstPos)) else {
+        guard let pos = PartOfSpeech(string: posString) else {
             throw Error.unknownPartOfSpeechTag(fromString: string)
         }
-        self = posTag
+        self = pos
     }
 }
 

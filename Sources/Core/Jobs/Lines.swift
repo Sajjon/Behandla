@@ -7,21 +7,22 @@
 
 import Foundation
 
-struct Lines<Line>: OrderedSetOwner where Line: Hashable & Codable {
+typealias Lines<Line> = LinesWithContext<Line, Void> where Line: LineFromCorpusConvertible
+
+struct LinesWithContext<Line, Context>: ExpressibleByCollection, Codable where Line: LineFromCorpusConvertible {
 
     typealias Element = Line
 
-    let orderedSet: OrderedSet<Line>
-    init(_ lines: OrderedSet<Line>) {
-        self.orderedSet = lines
+    let contents: [Line]
+    init(_ lines: [Line]) {
+        self.contents = lines
     }
-
-//    init(_ lines: OrderedSet<Line>) {
-//        self.init(lines: lines)
-//    }
 }
 
-extension Lines {
+extension LinesWithContext {
+    var lines: [Line] { contents }
     var numberOfLines: Int { count }
 }
 
+extension LinesWithContext: Equatable where Line: Equatable {}
+extension LinesWithContext: Hashable where Line: Hashable {}
