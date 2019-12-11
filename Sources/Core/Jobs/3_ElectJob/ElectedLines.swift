@@ -8,10 +8,10 @@
 import Foundation
 
 /// Lines which have been elected for confirmation.
-enum ElectContext {}
-typealias ElectedLines = LinesWithContext<ElectedLine, ElectContext>
-extension LinesWithContext: CustomStringConvertible where Line == ElectedLine {}
-extension LinesWithContext where Line == ElectedLine {
+typealias ElectedLines = Lines<ElectedLine>
+
+extension Lines: CustomStringConvertible where Line == ElectedLine {}
+extension Lines where Line == ElectedLine {
     var description: String {
         lines.map {
             [String?]([

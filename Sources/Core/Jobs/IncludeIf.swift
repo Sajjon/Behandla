@@ -8,7 +8,7 @@
 import Foundation
 
 // MARK: IncludeIf
-struct IncludeIf<Line>: ExpressibleByArrayLiteral where Line: LineFromCorpus {
+struct IncludeIf<Line>: ExpressibleByArrayLiteral where Line: LineFromCorpusConvertible {
     let rules: [Rule]
     init(rules: [Rule]) {
         self.rules = rules
