@@ -20,5 +20,6 @@ extension NamedTask {
 protocol Job: NamedTask {
     associatedtype Input
     associatedtype Output
+//    var corpusName: String { get }
     func work(input: Input) throws -> Output
 }

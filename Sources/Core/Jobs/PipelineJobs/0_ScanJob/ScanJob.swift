@@ -17,13 +17,7 @@ extension ScanJob: CacheableJob {
     typealias Input = RunContext
     typealias Output = ScannedLines
 
-    func validateCached(_ cached: Output) throws {
-        guard cached.numberOfLines >= runContext.numberOfLinesToScan else {
-            throw Error.notEnoughLinesScanned
-        }
-    }
-
-    func newWork(input _: Input) throws -> Output {
+    func newWork(input runContext: Input) throws -> Output {
         let inputFileName = runContext.fileNameOfInputCorpus
         let file = try Cacher.currentDirectoryPath.openFile(named: inputFileName)
 

@@ -26,20 +26,23 @@ public extension BIP39 {
     final class Creator {
 
         let runContext: RunContext
-
-        init(
-            fileNameOfInputCorpus: String,
-            numberOfLinesToScan: Int,
-            loadFromCache: Bool,
-            saveToCache: Bool
-        ) {
-            self.runContext = RunContext(
-                fileNameOfInputCorpus: fileNameOfInputCorpus,
-                numberOfLinesToScan: numberOfLinesToScan,
-                shouldLoadCachedInput: loadFromCache,
-                shouldCachedOutput: saveToCache
-            )
+        init(runContext: RunContext) {
+            self.runContext = runContext
         }
+
+//        init(
+//            fileNameOfInputCorpus: String,
+//            numberOfLinesToScan: Int,
+//            loadFromCache: Bool,
+//            saveToCache: Bool
+//        ) {
+//            self.runContext = RunContext(
+//                fileNameOfInputCorpus: fileNameOfInputCorpus,
+//                numberOfLinesToScan: numberOfLinesToScan,
+//                shouldLoadCachedInput: loadFromCache,
+//                shouldCachedOutput: saveToCache
+//            )
+//        }
     }
 }
 
@@ -49,15 +52,18 @@ public extension BIP39.Creator {
 
         print("🚀 Started jobs, context: \(runContext)")
 
-        let pipeline = Pipeline {
-            ScanJob(runContext: runContext)
-            ParseJob(runContext: runContext)
-            WordLengthJob(runContext: runContext)
-            WhitelistedPOSTagsJob(runContext: runContext)
-            HomonymJob(runContext: runContext)
-        }
+        let pipeline = Pipeline<RunContext, WordLengthJob.Output>(
+            runContext: runContext,
 
-        let result = try pipeline.work(input: runContext)
+            ScanJob(runContext: runContext),
+            ParseJob(runContext: runContext),
+            WordLengthJob(runContext: runContext)
+//            WhitelistedPOSTagsJob(runContext: runContext)
+//            HomonymJob(runContext: runContext)
+        )
+//
+        let result = try pipeline.runJobs()
+
         let lines = result.prefix(runContext.numberOfLinesToScan)
         print("🔮 Done with pipeline:\n🕐 \(pipeline) 🕤\nResult of pipeline #\(lines.count) lines.")
     }
@@ -90,19 +96,19 @@ public extension BIP39.Creator {
 
         let input = try readValue(for: "input", map: { $0 })  ?? "Assets/Input/corpus_first_100k_lines.txt"
         let lineCount = try readValue(for: "lines") { Int($0) } ?? 50_000
-        let loadFromCache = try readValue(for: "load") { Bool($0) } ?? true
-        let saveToCache = try readValue(for: "save") { Bool($0) } ?? true
+        let startAtStep = try readValue(for: "step") { Int($0) }
 
         if let argumentLeft = arguments.first {
             throw Error.unrecognizedArgument(name: argumentLeft.key, value: argumentLeft.value)
         }
 
-        self.init(
+        let runContext = RunContext(
             fileNameOfInputCorpus: input,
             numberOfLinesToScan: lineCount,
-            loadFromCache: loadFromCache,
-            saveToCache: saveToCache
+            startAtStep: startAtStep
         )
+
+        self.init(runContext: runContext)
     }
 
     convenience init(arguments: [String]) throws {

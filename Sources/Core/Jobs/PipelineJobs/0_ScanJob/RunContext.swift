@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class RunContext: CustomStringConvertible {
+struct RunContext: CustomStringConvertible {
 
     /// Name of corpus file to scan
     let fileNameOfInputCorpus: String
@@ -15,25 +15,23 @@ final class RunContext: CustomStringConvertible {
     /// How many lines to scan
     let numberOfLinesToScan: Int
 
-    /// Whether or not we should cache intermediate results between runs
-    var shouldLoadCachedInput: Bool
-    var shouldCachedOutput: Bool
+    /// Step to start at, if nil, last cached step, given the `fileName`, is used, if the cached result
+    /// contains number of lines >= `numberOfLinesToScan`.
+    var startAtStep: Int?
 
     init(
         fileNameOfInputCorpus: String,
         numberOfLinesToScan: Int,
-        shouldLoadCachedInput: Bool,
-        shouldCachedOutput: Bool
+        startAtStep: Int?
     ) {
         self.fileNameOfInputCorpus = fileNameOfInputCorpus
         self.numberOfLinesToScan = numberOfLinesToScan
-        self.shouldLoadCachedInput = shouldLoadCachedInput
-        self.shouldCachedOutput = shouldCachedOutput
+        self.startAtStep = startAtStep
     }
 }
 
 extension RunContext {
     var description: String {
-        "input: \(fileNameOfInputCorpus), #lines: \(numberOfLinesToScan), loadFromCache: \(shouldLoadCachedInput), saveToCache: \(shouldCachedOutput)"
+        "input: \(fileNameOfInputCorpus), #lines: \(numberOfLinesToScan), startAtStep: \(startAtStep.map { "\($0)" } ?? "nil")"
     }
 }

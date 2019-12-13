@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "Behandla",
     platforms: [
-        .macOS(.v10_13), .iOS(.v9)
+        .macOS(.v10_15), .iOS(.v13)
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
